@@ -16,7 +16,7 @@ by adding `aurora_ctx` to your list of dependencies in `mix.exs`:
 ```elixir 
 def deps do
   [
-    {:aurora_ctx, "~> 0.1.0"}
+    {:aurora_ctx, "~> 0.1.1"}
   ]
 end
 ```
@@ -52,6 +52,11 @@ list_products_paginated()          # List products with pagination
 list_products_paginated(opts)      # List with pagination options
 count_products()                   # Count total products
 count_products(opts)               # Count with filters
+
+# Pagination operations
+to_products_page(pagination, 2)    # Go to specific page
+next_products_page(pagination)     # Go to next page
+previous_products_page(pagination) # Go to previous page
 
 # Create operations
 create_product(%{name: "Item"})    # Create with attributes

@@ -167,9 +167,9 @@ IO.puts "Total pages: #{page1.pages_count}"
 IO.puts "Current page: #{page1.page}"
 
 # Navigate through pages
-next_page = Aurora.Ctx.Core.next_page(page1)
-prev_page = Aurora.Ctx.Core.previous_page(next_page)
-page5 = Aurora.Ctx.Core.to_page(page1, 5)
+next_page = Inventory.next_products_page(page1)
+prev_page = Inventory.previous_products_page(next_page)
+page5 = Inventory.to_products_page(page1, 5)
 
 # Combine with other options
 filtered_page = Inventory.list_products_paginated(

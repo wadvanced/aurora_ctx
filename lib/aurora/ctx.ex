@@ -31,6 +31,11 @@ defmodule Aurora.Ctx do
   - `count_users/0` - Count total records
   - `count_users/1` - Count records with options
 
+  ### Pagination Functions
+  - `to_users_page/2` - Navigate to a specific page
+  - `next_users_page/1` - Navigate to the next page
+  - `previous_users_page/1` - Navigate to the previous page
+
   ### Create Functions
   - `create_user/0` - Create a record with empty attributes
   - `create_user/1` - Create a record with given attributes
@@ -197,6 +202,9 @@ defmodule Aurora.Ctx do
       %{type: :list_paginated, name: "list_#{plural_infix}_paginated", arity: 1},
       %{type: :count, name: "count_#{plural_infix}", arity: 0},
       %{type: :count, name: "count_#{plural_infix}", arity: 1},
+      %{type: :to_page, name: "to_#{plural_infix}_page", arity: 2},
+      %{type: :next_page, name: "next_#{plural_infix}_page", arity: 1},
+      %{type: :previous_page, name: "previous_#{plural_infix}_page", arity: 1},
       %{type: :create, name: "create_#{infix}", arity: 0},
       %{type: :create, name: "create_#{infix}", arity: 1},
       %{type: :create, name: "create_#{infix}!", arity: 0},
@@ -400,6 +408,24 @@ defmodule Aurora.Ctx do
           unquote(function.update_changeset),
           unquote_splicing(attrs)
         )
+      end
+    end
+  end
+
+  defp generate_function(%{type: :to_page} = function) do
+    quote do
+      @doc false
+      def unquote(function.name)(pagination, page) do
+        Ctx.Core.to_page(pagination, page)
+      end
+    end
+  end
+
+  defp generate_function(%{type: type} = function) when type in [:next_page, :previous_page] do
+    quote do
+      @doc false
+      def unquote(function.name)(pagination) do
+        apply(Ctx.Core, unquote(function.type), [pagination])
       end
     end
   end

@@ -1,7 +1,6 @@
 defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
   use Aurora.Ctx.Test.RepoCase
 
-  alias Aurora.Ctx.Core
   alias Aurora.Ctx.Test.Support.Inventory.Product
 
   defmodule Inventory do
@@ -220,20 +219,20 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
     |> tap(&assert(Enum.count(&1.entries) == 5))
     |> tap(&assert(List.first(&1.entries).reference == "item_001"))
     |> tap(&assert(List.last(&1.entries).reference == "item_005"))
-    |> Core.next_page()
+    |> context.next_products_page()
     |> tap(&assert(Enum.count(&1.entries) == 5))
     |> tap(&assert(List.first(&1.entries).reference == "item_006"))
     |> tap(&assert(List.last(&1.entries).reference == "item_010"))
-    |> Core.previous_page()
+    |> context.previous_products_page()
     |> tap(&assert(Enum.count(&1.entries) == 5))
     |> tap(&assert(List.first(&1.entries).reference == "item_001"))
     |> tap(&assert(List.last(&1.entries).reference == "item_005"))
     ## Should stay in the same page since there are only
-    |> Core.to_page(30)
+    |> context.to_products_page(30)
     |> tap(&assert(Enum.count(&1.entries) == 5))
     |> tap(&assert(List.first(&1.entries).reference == "item_001"))
     |> tap(&assert(List.last(&1.entries).reference == "item_005"))
-    |> Core.to_page(11)
+    |> context.to_products_page(11)
     |> tap(&assert(Enum.count(&1.entries) == 5))
     |> tap(&assert(List.first(&1.entries).reference == "item_051"))
     |> tap(&assert(List.last(&1.entries).reference == "item_055"))

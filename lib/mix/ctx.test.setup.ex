@@ -1,4 +1,4 @@
-defmodule Mix.Tasks.Test.Setup do
+defmodule Mix.Tasks.Ctx.Test.Setup do
   @moduledoc """
   A Mix task for setting up the test environment by creating and migrating the test database.
   """

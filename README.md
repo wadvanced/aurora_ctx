@@ -34,8 +34,8 @@ defmodule MyApp.Inventory do
 
   # With custom options
   ctx_register_schema(Category, MyCustomRepo,
-    changeset_function: :custom_changeset,
-    create_changeset_function: :creation_changeset
+    update_changeset_function: :custom_changeset,
+    create_changeset: :creation_changeset
 )
 end
 ```

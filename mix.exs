@@ -2,7 +2,7 @@ defmodule Aurora.Ctx.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/wadvanced/aurora_ctx"
-  @version "0.1.0"
+  @version "0.1.1"
 
   def project do
     [
@@ -68,17 +68,14 @@ defmodule Aurora.Ctx.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:ecto_sql, "~> 3.10"},
+      {:ecto_sql, "~> 3.12"},
       {:postgrex, ">= 0.0.0"},
 
       ## Dev dependencies
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
       {:doctor, "~> 0.22", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.21", only: :dev, runtime: false},
-
-      ## Test ONLY dependencies
-      {:mox, "~> 1.0", only: :test}
+      {:ex_doc, "~> 0.38", only: :dev, runtime: false}
     ]
   end
 
@@ -95,7 +92,7 @@ defmodule Aurora.Ctx.MixProject do
         "doctor"
       ],
       test: [
-        "test.setup",
+        "ctx.test.setup",
         "test"
       ]
     ]

@@ -14,8 +14,8 @@ defmodule Aurora.Ctx do
         ctx_register_schema(User)
         # or with options
         ctx_register_schema(User, CustomRepo,
-          changeset_function: :custom_changeset,
-          create_changeset_function: :create_changeset
+          update_changeset: :custom_changeset,
+          create_changeset: :create_changeset
         )
       end
 
@@ -95,8 +95,12 @@ defmodule Aurora.Ctx do
     * `schema_module` (module()) - The Ecto schema module to generate functions for
     * `repo` (module() | nil) - (Optional) The Ecto.Repo to use for database operations. Can be set globally with `@ctx_repo_module`
     * `opts` (keyword()) - (Optional) Configuration options:
-      * `:changeset_function` (atom()) - The function to use for changesets (default: `:changeset`)
-      * `:create_changeset_function` (atom()) - A specific function to use for creation changesets
+      * `:update_changeset` (atom()) - The function to use for changesets (default: `:changeset`)
+      * `:create_changeset` (atom()) - A specific function to use for creation changesets (default: `:changeset`)
+      * `:infix` (binary) - The fixed part to use when constructing the functions' names.
+          By default, is the lowercase of the module name (the last part of the full module name).
+      * `:plural_infix` (binary) - The fixed part to use when constructing the functions' names for plural functions.
+          By default, uses the table name defined in the schema module.
 
   ## Repository Configuration
   The Ecto.Repo can be configured in two ways:
@@ -106,7 +110,27 @@ defmodule Aurora.Ctx do
   If neither is specified, it will attempt to use `YourApp.Repo` based on your
   context module's namespace.
 
-  ## Example
+  ## Function Names
+
+  Given a User schema with table "users":
+
+      # Default naming (no options)
+      get_user/1          # Singular functions use module name
+      list_users/0        # Plural functions use table name
+
+      # With infix: "customer"
+      get_customer/1      # Singular functions use custom infix
+      list_users/0        # Plural functions still use table name
+
+      # With plural_infix: "customers"
+      get_user/1          # Singular functions use module name
+      list_customers/0    # Plural functions use custom plural infix
+
+      # With both infix: "customer" and plural_infix: "customers"
+      get_customer/1      # Singular functions use custom infix
+      list_customers/0    # Plural functions use custom plural infix
+
+  ## Examples
 
       # Using explicit repo
       ctx_register_schema(User, MyApp.Repo)
@@ -115,9 +139,20 @@ defmodule Aurora.Ctx do
       @ctx_repo_module MyApp.Repo
       ctx_register_schema(User)
 
-      # With additional options
-      ctx_register_schema(User, MyApp.Repo, changeset_function: :custom_changeset)
+      # Generating custom function names
+      ctx_register_schema(User, MyApp.Repo,
+        infix: "customer",
+        plural_infix: "customers"
+      )
   """
+  @spec ctx_register_schema(module, module | keyword) :: Macro.t()
+  defmacro ctx_register_schema(schema_module, opts) when is_list(opts) do
+    quote do
+      ctx_register_schema(unquote(schema_module), nil, unquote(opts))
+    end
+  end
+
+  @spec ctx_register_schema(module, module | nil, keyword) :: Macro.t()
   defmacro ctx_register_schema(schema_module, repo \\ nil, opts \\ []) do
     quote do
       Module.put_attribute(__MODULE__, :_ctx_crud_schema, %{
@@ -143,40 +178,42 @@ defmodule Aurora.Ctx do
       * `:name` - The function name
       * `:arity` - The function arity
   """
-  @spec implementable_functions(module()) :: list()
-  def implementable_functions(schema_module) do
-    source = schema_module.__schema__(:source)
+  @spec implementable_functions(module(), keyword) :: list()
+  def implementable_functions(schema_module, opts \\ []) do
+    plural_infix =
+      opts
+      |> get_option(:plural_infix, schema_module.__schema__(:source))
+      |> Macro.underscore()
 
-    module =
-      schema_module
-      |> Module.split()
-      |> List.last()
+    infix =
+      opts
+      |> get_option(:infix, schema_module |> Module.split() |> List.last())
       |> Macro.underscore()
 
     [
-      %{type: :list, name: "list_#{source}", arity: 0},
-      %{type: :list, name: "list_#{source}", arity: 1},
-      %{type: :list_paginated, name: "list_#{source}_paginated", arity: 0},
-      %{type: :list_paginated, name: "list_#{source}_paginated", arity: 1},
-      %{type: :count, name: "count_#{source}", arity: 0},
-      %{type: :count, name: "count_#{source}", arity: 1},
-      %{type: :create, name: "create_#{module}", arity: 0},
-      %{type: :create, name: "create_#{module}", arity: 1},
-      %{type: :create, name: "create_#{module}!", arity: 0},
-      %{type: :create, name: "create_#{module}!", arity: 1},
-      %{type: :get, name: "get_#{module}", arity: 1},
-      %{type: :get, name: "get_#{module}", arity: 2},
-      %{type: :get, name: "get_#{module}!", arity: 1},
-      %{type: :get, name: "get_#{module}!", arity: 2},
-      %{type: :delete, name: "delete_#{module}", arity: 1},
-      %{type: :delete, name: "delete_#{module}!", arity: 1},
-      %{type: :change, name: "change_#{module}", arity: 1},
-      %{type: :change, name: "change_#{module}", arity: 2},
-      %{type: :update, name: "update_#{module}", arity: 1},
-      %{type: :update, name: "update_#{module}", arity: 2},
-      %{type: :new, name: "new_#{module}", arity: 0},
-      %{type: :new, name: "new_#{module}", arity: 1},
-      %{type: :new, name: "new_#{module}", arity: 2}
+      %{type: :list, name: "list_#{plural_infix}", arity: 0},
+      %{type: :list, name: "list_#{plural_infix}", arity: 1},
+      %{type: :list_paginated, name: "list_#{plural_infix}_paginated", arity: 0},
+      %{type: :list_paginated, name: "list_#{plural_infix}_paginated", arity: 1},
+      %{type: :count, name: "count_#{plural_infix}", arity: 0},
+      %{type: :count, name: "count_#{plural_infix}", arity: 1},
+      %{type: :create, name: "create_#{infix}", arity: 0},
+      %{type: :create, name: "create_#{infix}", arity: 1},
+      %{type: :create, name: "create_#{infix}!", arity: 0},
+      %{type: :create, name: "create_#{infix}!", arity: 1},
+      %{type: :get, name: "get_#{infix}", arity: 1},
+      %{type: :get, name: "get_#{infix}", arity: 2},
+      %{type: :get, name: "get_#{infix}!", arity: 1},
+      %{type: :get, name: "get_#{infix}!", arity: 2},
+      %{type: :delete, name: "delete_#{infix}", arity: 1},
+      %{type: :delete, name: "delete_#{infix}!", arity: 1},
+      %{type: :change, name: "change_#{infix}", arity: 1},
+      %{type: :change, name: "change_#{infix}", arity: 2},
+      %{type: :update, name: "update_#{infix}", arity: 1},
+      %{type: :update, name: "update_#{infix}", arity: 2},
+      %{type: :new, name: "new_#{infix}", arity: 0},
+      %{type: :new, name: "new_#{infix}", arity: 1},
+      %{type: :new, name: "new_#{infix}", arity: 2}
     ]
   end
 
@@ -190,18 +227,19 @@ defmodule Aurora.Ctx do
     repo_module =
       get_repo_module(context_module, repo)
 
-    create_changeset_function = get_option(opts, :create_changeset_function)
-    changeset_function = get_option(opts, :changeset_function)
+    create_changeset = Keyword.get(opts, :create_changeset, :changeset)
+
+    update_changeset = Keyword.get(opts, :update_changeset, :changeset)
 
     implemented_functions =
       schema_module
-      |> implementable_functions()
+      |> implementable_functions(opts)
       |> Enum.map(
         &Map.merge(&1, %{
           repo_module: repo_module,
           schema_module: schema_module,
-          create_changeset_function: create_changeset_function,
-          changeset_function: changeset_function,
+          create_changeset: create_changeset,
+          update_changeset: update_changeset,
           name: String.to_atom(&1.name)
         })
       )
@@ -273,7 +311,7 @@ defmodule Aurora.Ctx do
         apply(Ctx.Core, unquote(core_function), [
           unquote(function.repo_module),
           unquote(function.schema_module),
-          unquote(function.create_changeset_function),
+          unquote(function.create_changeset),
           unquote_splicing(attrs)
         ])
       end
@@ -329,14 +367,14 @@ defmodule Aurora.Ctx do
         quote do
           @doc false
           def unquote(function.name)(unquote_splicing(args)) do
-            Ctx.Core.change(entity, unquote(function.changeset_function), attrs)
+            Ctx.Core.change(entity, unquote(function.update_changeset), attrs)
           end
         end
       else
         quote do
           @doc false
           def unquote(function.name)(unquote_splicing(args)) do
-            Ctx.Core.change(entity, unquote(function.changeset_function))
+            Ctx.Core.change(entity, unquote(function.update_changeset))
           end
         end
       end
@@ -351,11 +389,17 @@ defmodule Aurora.Ctx do
   # update_product(entity, attrs)
   defp generate_function(%{type: :update, arity: arity} = function) do
     args = if arity > 1, do: [quote(do: entity), quote(do: attrs)], else: [quote(do: entity)]
+    attrs = if arity > 1, do: [quote(do: attrs)], else: []
 
     quote do
       @doc false
       def unquote(function.name)(unquote_splicing(args)) do
-        Ctx.Core.update(unquote(function.repo_module), unquote_splicing(args))
+        Ctx.Core.update(
+          unquote(function.repo_module),
+          entity,
+          unquote(function.update_changeset),
+          unquote_splicing(attrs)
+        )
       end
     end
   end
@@ -397,14 +441,11 @@ defmodule Aurora.Ctx do
 
   defp get_repo_module(_context_module, repo), do: repo
 
-  @spec get_option(keyword, atom) :: any
-  defp get_option(opts, :create_changeset_function) do
-    if opts[:create_changeset_function],
-      do: opts[:create_changeset],
-      else: get_option(opts, :changeset_function)
-  end
-
-  defp get_option(opts, :changeset_function) do
-    if opts[:changeset_function], do: opts[:changeset_function], else: :changeset
+  @spec get_option(keyword, atom, binary) :: binary
+  defp get_option(opts, tag, default) do
+    case opts[tag] do
+      nil -> default
+      option -> option
+    end
   end
 end

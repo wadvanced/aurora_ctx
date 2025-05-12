@@ -252,8 +252,8 @@ defmodule MyApp.Inventory do
   use Aurora.Ctx,
     schema_module: MyApp.Inventory.Product,
     repo_module: MyApp.Repo,
-    changeset_function: :custom_changeset,
-    create_changeset_function: :create_changeset
+    update_changeset_function: :custom_changeset,
+    create_changeset: :create_changeset
 
   # Your additional context functions...
 end

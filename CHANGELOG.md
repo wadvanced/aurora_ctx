@@ -1,5 +1,10 @@
 # Changelog for v0.x
 
+## v0.1.2
+Requires Elixir v1.17+
+Compatible with Ecto 3.2+
+
+
 ## v0.1.1
 Requires Elixir v1.17+
 Compatible with Ecto 3.2+

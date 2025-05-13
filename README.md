@@ -10,13 +10,13 @@ A powerful DSL for automatically generating CRUD operations in Elixir context mo
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
+[available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `aurora_ctx` to your list of dependencies in `mix.exs`:
 
 ```elixir 
 def deps do
   [
-    {:aurora_ctx, "~> 0.1.1"}
+    {:aurora_ctx, "~> 0.1.2"}
   ]
 end
 ```

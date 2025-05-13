@@ -157,6 +157,11 @@ For each schema, the following functions are automatically generated:
 - `count_*()` - Count total records
 - `count_*(opts)` - Count records with options
 
+### Pagination Functions
+- `to_*_page(pagination, page)`- Navigates to the specific page, if possible
+- `next_*_page(pagination)` - Advances to the next page from the current one, if possible
+- `previous_*_page(pagination)` - Goes one page back from the current one, if possible
+
 ### Create Functions
 - `create_*()` - Create a record with empty attributes
 - `create_*(attrs)` - Create a record with given attributes

@@ -56,6 +56,13 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
     assert_raise(Ecto.StaleEntryError, fn ->
       Core.update(Repo, items.id_2, %{description: "FIRST UPDATE test item_2"})
     end)
+
+    items.id_1
+    |> Core.change(%{description: "SECOND UPDATE test item_1"})
+    |> then(&Core.update(Repo, &1))
+    |> tap(&assert(elem(&1, 0) == :ok))
+    |> elem(1)
+    |> tap(&assert(&1.description == "SECOND UPDATE test item_1"))
   end
 
   test "Test new function" do

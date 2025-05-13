@@ -4,6 +4,15 @@
 Requires Elixir v1.17+
 Compatible with Ecto 3.2+
 
+### Documentation fixes
+- README.md - more details added.
+- overview.md - description of pagination functions added.
+- functions.md - description of pagination functions.
+- examples.md - Added Phoenix examples of pagination functions, improved multiple changeset examples.
+
+### Features
+- Added a `:changeset` option to ctx_register_schema. 
+  This provides a default changeset for create, update and change functions.
 
 ## v0.1.1
 Requires Elixir v1.17+

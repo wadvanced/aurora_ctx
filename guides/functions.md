@@ -29,6 +29,104 @@ The `opts` parameter supports:
 - `:order_by` - Sorting specification
 - `:paginate` - Pagination options (page, per_page)
 
+## Pagination Functions
+
+```elixir
+to_products_page(pagination, page)     # Returns %Pagination{} for specific page
+next_products_page(pagination)         # Returns %Pagination{} for next page
+previous_products_page(pagination)     # Returns %Pagination{} for previous page
+```
+
+### Example
+```elixir
+# Get first page of results
+page1 = list_products_paginated(
+  paginate: %{page: 1, per_page: 20},
+  preload: [:category],
+  order_by: [desc: :inserted_at]
+)
+
+# Access entries in current page
+Enum.each(page1.entries, fn product ->
+  IO.puts "#{product.name}: $#{product.price}"
+end)
+
+# Navigate through pages
+next_page = next_products_page(page1)
+prev_page = previous_products_page(next_page)
+page5 = to_products_page(page1, 5)
+
+# Access pagination metadata
+IO.puts "Total entries: #{page1.entries_count}"
+IO.puts "Total pages: #{page1.pages_count}"
+IO.puts "Current page: #{page1.page}"
+```
+
+### Phoenix Example
+
+Controller:
+```elixir
+def index(conn, params) do
+  pagination = Inventory.list_products_paginated(
+    paginate: %{page: params["page"] || 1, per_page: 20},
+    order_by: [desc: :inserted_at]
+  )
+  render(conn, :index, pagination: pagination)
+end
+
+def page(conn, %{"page" => page}) do
+  pagination = conn.assigns.pagination
+  new_page = Inventory.to_products_page(pagination, page)
+  render(conn, :index, pagination: new_page)
+end
+
+def next_page(conn, _params) do
+  pagination = conn.assigns.pagination
+  next_page = Inventory.next_products_page(pagination)
+  render(conn, :index, pagination: next_page)
+end
+
+def previous_page(conn, _params) do
+  pagination = conn.assigns.pagination
+  prev_page = Inventory.previous_products_page(pagination)
+  render(conn, :index, pagination: prev_page)
+end
+```
+
+Template:
+```heex
+<div class="products-grid">
+  <%= for product <- @pagination.entries do %>
+    <div class="product-card">
+      <h3><%= product.name %></h3>
+      <p class="price">$<%= product.price %></p>
+    </div>
+  <% end %>
+</div>
+
+<nav class="pagination">
+  <%= if @pagination.page > 1 do %>
+    <%= link "Previous", to: ~p"/products/previous" %>
+  <% end %>
+  
+  <span>
+    Page <%= @pagination.page %> of <%= @pagination.pages_count %>
+    (<%= @pagination.entries_count %> total items)
+  </span>
+  
+  <%= if @pagination.page < @pagination.pages_count do %>
+    <%= link "Next", to: ~p"/products/next" %>
+  <% end %>
+  
+  <div class="page-select">
+    <%= for page <- 1..@pagination.pages_count do %>
+      <%= link "#{page}", to: ~p"/products/page/#{page}", 
+          class: if(@pagination.page == page, do: "active") %>
+    <% end %>
+  </div>
+</nav>
+```
+
 ## Get Functions
 
 ```elixir
@@ -116,27 +214,46 @@ product = new_product(%{name: "Widget Pro", price: Decimal.new("29.99")})
 ```elixir
 # Simple equality
 where: [status: :active]
+where: {:status, :active}
 
 # Comparisons
-where: {:price, :greater_than, 100}
-where: {:price, :less_than, 200}
-where: {:date, :greater_equal_than, ~D[2023-01-01]}
+where: {:price, :greater_than, 100}     # or :gt
+where: {:price, :greater_equal_than, 100} # or :ge
+where: {:price, :less_than, 200}        # or :lt
+where: {:price, :less_equal_than, 200}  # or :le
+where: {:price, :equal_to, 150}         # or :eq
+where: {:date, :greater_than, ~D[2023-01-01]}
 
 # Ranges
 where: {:price, :between, 100, 200}
 
-# Multiple conditions
-where: [status: :active, price: {:greater_than, 100}]
+# Multiple conditions (combined with AND)
+where: [
+  status: :active,
+  {:price, :greater_than, 100},
+  {:date, :between, ~D[2023-01-01], ~D[2023-12-31]}
+]
+
+# OR conditions (all options above work with or_where)
+or_where: [status: :draft]
+or_where: {:price, :less_than, 50}
 ```
 
 ### Sorting
 ```elixir
 # Simple sort
-order_by: :inserted_at           # ascending
-order_by: {:desc, :inserted_at}  # descending
+order_by: :inserted_at                    # ascending
+order_by: {:asc, :name}                  # ascending explicit
+order_by: {:desc, :inserted_at}          # descending
+order_by: {:asc_nulls_last, :name}       # nulls at end
+order_by: {:desc_nulls_first, :priority} # nulls at start
 
 # Multiple fields
-order_by: [{:desc, :inserted_at}, {:asc, :name}]
+order_by: [
+  {:desc, :inserted_at},
+  {:asc, :name},
+  :price
+]
 ```
 
 ### Pagination

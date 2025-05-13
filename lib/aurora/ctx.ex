@@ -100,12 +100,13 @@ defmodule Aurora.Ctx do
     * `schema_module` (module()) - The Ecto schema module to generate functions for
     * `repo` (module() | nil) - (Optional) The Ecto.Repo to use for database operations. Can be set globally with `@ctx_repo_module`
     * `opts` (keyword()) - (Optional) Configuration options:
-      * `:update_changeset` (atom()) - The function to use for changesets (default: `:changeset`)
-      * `:create_changeset` (atom()) - A specific function to use for creation changesets (default: `:changeset`)
+      * `:changeset` (atom()) - A specific function to use for change function changesets (default: `:changeset`)
+      * `:create_changeset` (atom()) - A specific function to use for creation changesets (defaults to the value of option `:changeset` or the function `:changeset`)
       * `:infix` (binary) - The fixed part to use when constructing the functions' names.
           By default, is the lowercase of the module name (the last part of the full module name).
       * `:plural_infix` (binary) - The fixed part to use when constructing the functions' names for plural functions.
           By default, uses the table name defined in the schema module.
+      * `:update_changeset` (atom()) - The function to use for changesets (defaults to the value of option `:changeset` or the function `:changeset`)
 
   ## Repository Configuration
   The Ecto.Repo can be configured in two ways:
@@ -235,9 +236,11 @@ defmodule Aurora.Ctx do
     repo_module =
       get_repo_module(context_module, repo)
 
-    create_changeset = Keyword.get(opts, :create_changeset, :changeset)
+    changeset = Keyword.get(opts, :changeset, :changeset)
 
-    update_changeset = Keyword.get(opts, :update_changeset, :changeset)
+    create_changeset = Keyword.get(opts, :create_changeset, changeset)
+
+    update_changeset = Keyword.get(opts, :update_changeset, changeset)
 
     implemented_functions =
       schema_module
@@ -246,6 +249,7 @@ defmodule Aurora.Ctx do
         &Map.merge(&1, %{
           repo_module: repo_module,
           schema_module: schema_module,
+          changeset: changeset,
           create_changeset: create_changeset,
           update_changeset: update_changeset,
           name: String.to_atom(&1.name)
@@ -375,14 +379,14 @@ defmodule Aurora.Ctx do
         quote do
           @doc false
           def unquote(function.name)(unquote_splicing(args)) do
-            Ctx.Core.change(entity, unquote(function.update_changeset), attrs)
+            Ctx.Core.change(entity, unquote(function.changeset), attrs)
           end
         end
       else
         quote do
           @doc false
           def unquote(function.name)(unquote_splicing(args)) do
-            Ctx.Core.change(entity, unquote(function.update_changeset))
+            Ctx.Core.change(entity, unquote(function.changeset))
           end
         end
       end

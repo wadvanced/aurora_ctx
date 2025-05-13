@@ -17,7 +17,7 @@ Add `aurora_ctx` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:aurora_ctx, "~> 0.1.0"}
+    {:aurora_ctx, "~> 0.1.2"}
   ]
 end
 ```
@@ -28,7 +28,7 @@ end
 
 > **Tip**: Consider using [TypedEctoSchema](https://hexdocs.pm/typed_ecto_schema) to reduce boilerplate in your schema definitions and add compile-time type checking.
 
-Let's start with a typical Ecto schema definition that we'll use throughout the examples:
+Let's start with a typical Ecto schema definition that we'll use throughout this overview:
 
 ```elixir
 defmodule MyApp.Inventory.Product do
@@ -127,11 +127,12 @@ product = Inventory.get_product!(1)
 
 ### Function Customization
 
-You can override any generated function by defining it before calling `ctx_register_schema`:
+Aurora.Ctx respects existing function definitions. You can provide custom implementations for specific operations while letting Aurora.Ctx generate the rest. Functions can be defined anywhere in the module:
 
 ```elixir
 defmodule MyApp.Inventory do
   use Aurora.Ctx
+  ctx_register_schema(MyApp.Inventory.Product)
 
   def list_products do
     # Custom implementation with specific business logic
@@ -140,46 +141,67 @@ defmodule MyApp.Inventory do
     |> order_by([p], [desc: p.inserted_at])
     |> MyApp.Repo.all()
   end
-
-  ctx_register_schema(MyApp.Inventory.Product)
 end
 ```
+
+### Changeset Customization
+
+Aurora.Ctx provides several options for customizing which changeset functions are used:
+
+```elixir
+defmodule MyApp.Inventory do
+  use Aurora.Ctx
+
+  # Default changeset for all operations
+  ctx_register_schema(Product, changeset: :custom_changeset)
+
+  # Separate changesets for create/update
+  ctx_register_schema(Product,
+    create_changeset: :creation_changeset,
+    update_changeset: :update_changeset
+  )
+end
+```
+
+The priority for selecting changeset functions is:
+1. Operation-specific changeset (create_changeset/update_changeset)
+2. Default changeset specified with :changeset option
+3. Standard "changeset/2" function in the schema
 
 ## Generated Functions
 
 For each schema, the following functions are automatically generated:
 
 ### List Functions
-- `list_*()`- List all records
-- `list_*(opts)` - List all records with options
-- `list_*_paginated()` - List records with pagination
-- `list_*_paginated(opts)` - List records with pagination and options
-- `count_*()` - Count total records
-- `count_*(opts)` - Count records with options
+- `list_*(opts \\ nil)` - List all records with optional filtering/sorting
+- `list_*_paginated(opts \\ %{})` - List records with pagination and options
+- `count_*(opts \\ nil)` - Count records with optional filtering
+
+### Pagination Functions
+- `to_*_page(pagination, page_number)` - Navigates to the specified page number
+- `next_*_page(pagination)` - Advances to the next page of results
+- `previous_*_page(pagination)` - Goes back to the previous page of results
 
 ### Create Functions
-- `create_*()` - Create a record with empty attributes
-- `create_*(attrs)` - Create a record with given attributes
-- `create_*!()` - Create a record with empty attributes (raises on error)
-- `create_*!(attrs)` - Create a record with given attributes (raises on error)
+- `create_*(attrs \\ %{})` - Create a record with optional attributes
+- `create_*!(attrs \\ %{})` - Create a record with optional attributes (raises on error)
 
 ### Get Functions
-- `get_*(id)` - Get a record by ID
-- `get_*(id, opts)` - Get a record by ID with options
-- `get_*!(id)` - Get a record by ID (raises if not found)
-- `get_*!(id, opts)` - Get a record by ID with options (raises if not found)
+- `get_*(id, opts \\ [])` - Get a record by ID with optional preloads
+- `get_*!(id, opts \\ [])` - Get a record by ID with optional preloads (raises if not found)
 
 ### Delete Functions
-- `delete_*(entity)` - Delete a record
-- `delete_*!(entity)` - Delete a record (raises on error)
+- `delete_*(entity)` - Delete the given record
+- `delete_*!(entity)` - Delete the given record (raises on error)
 
 ### Change Functions
-- `change_*(entity)` - Create a changeset from a record
-- `change_*(entity, attrs)` - Create a changeset from a record with attributes
+- `change_*(entity_or_changeset, attrs \\ %{})` - Create a changeset from an entity or existing changeset with optional attributes
 
 ### Update Functions
-- `update_*(entity)` - Update a record
-- `update_*(entity, attrs)` - Update a record with attributes
+- `update_*(entity_or_changeset)` - Update a record from an entity or changeset
+- `update_*(entity_or_changeset, attrs)` - Update a record with attributes, accepts entity or changeset
+- `update_*!(entity_or_changeset)` - Update a record from an entity or changeset (raises on error)
+- `update_*!(entity_or_changeset, attrs)` - Update a record with attributes, accepts entity or changeset (raises on error)
 
 ### New Functions
 - `new_*()` - Initialize a new struct
@@ -239,6 +261,5 @@ While using the Core module directly provides flexibility, using proper contexts
 3. **Consistency**: Generated functions ensure consistent naming and behavior across your app
 4. **Documentation**: Function names in contexts are more descriptive of their business purpose
 5. **Maintainability**: Changes to database operations can be centralized in contexts
-6. **Type Safety**: Generated functions include proper typespecs for better tooling support
 
 Consider using proper contexts for most application code, and reserve direct Core usage for special cases where flexibility is more important than the benefits listed above.

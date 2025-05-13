@@ -156,27 +156,103 @@ products = Inventory.list_products(
 Implement and navigate through paginated results. Results are wrapped in an `Aurora.Ctx.Pagination` struct that provides additional metadata and navigation helpers.
 
 ```elixir
-# Basic pagination
+# Basic pagination with options
 page1 = Inventory.list_products_paginated(
-  paginate: %{page: 1, per_page: 20}
+  paginate: %{page: 1, per_page: 20},
+  preload: [:category],
+  order_by: [desc: :inserted_at]
 )
 
-# Access pagination info
+# Access entries and metadata
+Enum.each(page1.entries, fn product ->
+  IO.puts "#{product.name}: $#{product.price}"
+end)
 IO.puts "Total entries: #{page1.entries_count}"
 IO.puts "Total pages: #{page1.pages_count}"
-IO.puts "Current page: #{page1.page}"
 
 # Navigate through pages
 next_page = Inventory.next_products_page(page1)
 prev_page = Inventory.previous_products_page(next_page)
 page5 = Inventory.to_products_page(page1, 5)
+```
 
-# Combine with other options
-filtered_page = Inventory.list_products_paginated(
-  where: [category_id: 1],
-  order_by: [desc: :inserted_at],
-  paginate: %{page: 1, per_page: 10}
-)
+#### Phoenix Example
+
+Router:
+```elixir
+scope "/", MyAppWeb do
+  pipe_through :browser
+  
+  resources "/products", ProductController
+  get "/products/page/:page", ProductController, :page
+  get "/products/next", ProductController, :next_page
+  get "/products/previous", ProductController, :previous_page
+end
+```
+
+Controller:
+```elixir
+def index(conn, params) do
+  pagination = Inventory.list_products_paginated(
+    paginate: %{page: params["page"] || 1, per_page: 20},
+    order_by: [desc: :inserted_at]
+  )
+  render(conn, :index, pagination: pagination)
+end
+
+def page(conn, %{"page" => page}) do
+  current_page = conn.assigns.pagination
+  case Inventory.to_products_page(current_page, page) do
+    {:ok, new_page} -> render(conn, :index, pagination: new_page)
+    {:error, :invalid_page} -> redirect(conn, to: ~p"/products")
+  end
+end
+
+def next_page(conn, _params) do
+  pagination = conn.assigns.pagination
+  next_page = Inventory.next_products_page(pagination)
+  render(conn, :index, pagination: next_page)
+end
+
+def previous_page(conn, _params) do
+  pagination = conn.assigns.pagination
+  prev_page = Inventory.previous_products_page(pagination)
+  render(conn, :index, pagination: prev_page)
+end
+```
+
+Template:
+```heex
+<div class="products-grid">
+  <%= for product <- @pagination.entries do %>
+    <div class="product-card">
+      <h3><%= product.name %></h3>
+      <p class="price">$<%= product.price %></p>
+    </div>
+  <% end %>
+</div>
+
+<nav class="pagination">
+  <%= if @pagination.page > 1 do %>
+    <%= link "Previous", to: ~p"/products/previous" %>
+  <% end %>
+  
+  <span>
+    Page <%= @pagination.page %> of <%= @pagination.pages_count %>
+    (<%= @pagination.entries_count %> total items)
+  </span>
+  
+  <%= if @pagination.page < @pagination.pages_count do %>
+    <%= link "Next", to: ~p"/products/next" %>
+  <% end %>
+  
+  <div class="page-select">
+    <%= for page <- 1..@pagination.pages_count do %>
+      <%= link "#{page}", to: ~p"/products/page/#{page}", 
+          class: if(@pagination.page == page, do: "active") %>
+    <% end %>
+  </div>
+</nav>
 ```
 
 ### Preloading Associates
@@ -252,7 +328,7 @@ defmodule MyApp.Inventory do
   use Aurora.Ctx,
     schema_module: MyApp.Inventory.Product,
     repo_module: MyApp.Repo,
-    update_changeset_function: :custom_changeset,
+    update_changeset: :custom_changeset,
     create_changeset: :create_changeset
 
   # Your additional context functions...
@@ -285,9 +361,20 @@ defmodule MyApp.Inventory.Product do
   end
 end
 
-# Usage
-product = Inventory.new_product()
-changeset = Inventory.change_product(product, %{name: "New Product"})
+# Usage of custom changesets
+# Create with custom create_changeset
+{:ok, product} = Inventory.create_product(%{
+  name: "New Product",
+  price: Decimal.new("29.99")
+})
+
+# Update with custom_changeset
+{:ok, updated} = Inventory.update_product(product, %{
+  status: "active"
+})
+
+# Get changeset for form
+changeset = Inventory.change_product(product, %{status: "inactive"})
 ```
 
 For more examples and use cases, check the test files in the [GitHub repository](https://github.com/wadvanced/aurora_ctx).

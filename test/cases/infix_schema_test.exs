@@ -11,6 +11,18 @@ defmodule Aurora.Ctx.Test.Cases.InfixSchemaTest do
     ctx_register_schema(Product, infix: "TheProduct", plural_infix: "all_products")
   end
 
+  test "Test function creations" do
+    existing_functions =
+      :functions
+      |> __MODULE__.Inventory.__info__()
+      |> Enum.map(&{&1 |> elem(0) |> to_string(), elem(&1, 1)})
+
+    Product
+    |> Aurora.Ctx.implementable_functions(infix: "TheProduct", plural_infix: "all_products")
+    |> Enum.map(&{&1.name, &1.arity})
+    |> Enum.each(&assert(&1 in existing_functions))
+  end
+
   test "Test create function" do
     context = __MODULE__.Inventory
 

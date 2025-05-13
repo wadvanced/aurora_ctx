@@ -3,20 +3,22 @@
 A powerful DSL for automatically generating CRUD operations in Elixir context modules from Ecto schemas. Aurora.Ctx provides:
 
 - Automatic CRUD function generation from Ecto schemas
-- Built-in pagination support
+- Built-in pagination with navigation helpers
 - Advanced query building with filters and sorting
 - Flexible preloading of associations
-- Customizable changeset functions
+- Customizable changeset functions for create/update operations
+- Safe and raising versions of operations
+- Full Ecto compatibility and query composition
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
+[available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `aurora_ctx` to your list of dependencies in `mix.exs`:
 
 ```elixir 
 def deps do
   [
-    {:aurora_ctx, "~> 0.1.1"}
+    {:aurora_ctx, "~> 0.1.2"}
   ]
 end
 ```
@@ -34,7 +36,7 @@ defmodule MyApp.Inventory do
 
   # With custom options
   ctx_register_schema(Category, MyCustomRepo,
-    update_changeset_function: :custom_changeset,
+    update_changeset: :custom_changeset,
     create_changeset: :creation_changeset
 )
 end
@@ -45,45 +47,36 @@ end
 For a schema named `Product` with source "products", the following functions are automatically generated:
 
 ```elixir
-# List operations
+# List operations with advanced filtering
 list_products()                    # List all products
-list_products(opts)                # List with opts
-list_products_paginated()          # List products with pagination
-list_products_paginated(opts)      # List with pagination options
-count_products()                   # Count total products
-count_products(opts)               # Count with filters
+list_products(                     # List with filters and sorting
+  where: [status: :active],
+  order_by: [desc: :inserted_at],
+  preload: [:category]
+)
 
-# Pagination operations
-to_products_page(pagination, 2)    # Go to specific page
-next_products_page(pagination)     # Go to next page
-previous_products_page(pagination) # Go to previous page
+# Pagination with navigation
+page = list_products_paginated(
+  paginate: %{page: 1, per_page: 20}
+)
+next_page = next_products_page(page)
+prev_page = previous_products_page(page)
 
-# Create operations
-create_product(%{name: "Item"})    # Create with attributes
-create_product!(%{name: "Item"})   # Create with raising version
-create_product()                   # Create with empty attributes
-create_product!()                  # Create empty with raising version
+# Create with custom changeset
+create_product(%{name: "Item"})    # Uses default or specified changeset
+create_product!(%{name: "Item"})   # Raising version
 
-# Read operations
-get_product(1)                     # Get by ID
-get_product!(1)                    # Get by ID (raises if not found)
-get_product(1, preload: [:items])  # Get by ID with preloads
-get_product!(1, preload: [:items]) # Get by ID with preloads (raises)
+# Read with preloads
+get_product(1, preload: [:category, reviews: [:user]])
+get_product!(1)                    # Raising version
 
-# Update operations
-update_product(product, attrs)     # Update existing product
-update_product(product)            # Update without new attributes
-change_product(product, attrs)     # Create a changeset
-change_product(product)            # Create changeset without attrs
+# Update with custom changeset
+update_product(product, attrs)     # Uses default or specified changeset
+change_product(product)            # Get changeset for forms
 
 # Delete operations
-delete_product(product)            # Delete a product
-delete_product!(product)           # Delete (raises on error)
-
-# Initialize operations
-new_product()                      # Create new struct
-new_product(attrs)                 # Create with attributes
-new_product(attrs, opts)           # Create with attributes and options
+delete_product(product)            # Returns {:ok, struct} or {:error, changeset}
+delete_product!(product)           # Raising version
 ```
 
 ## Documentation 

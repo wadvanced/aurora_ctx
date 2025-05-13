@@ -187,23 +187,23 @@ defmodule Aurora.Ctx.Core do
   Creates a new record.
 
   Parameters:
-  - repo_module (module) - Ecto.Repo to use
-  - schema_module (module) - Schema to create
-  - attrs (map) - Attributes for the new record
+  - repo_module (module()) - Ecto.Repo to use
+  - schema_module (module() | ) - Schema to create
+  - attrs (map()) - Attributes for the new record
 
   Returns {:ok, schema} on success, {:error, changeset} on failure.
   """
-  @spec create(module(), module(), map() | nil) ::
+  @spec create(module(), module() | Ecto.Changeset.t(), map() | nil) ::
           {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
-  def create(repo_module, schema_module, %{} = attrs),
-    do: create(repo_module, schema_module, :changeset, attrs)
+  def create(repo_module, schema_module_or_changeset, %{} = attrs),
+    do: create(repo_module, schema_module_or_changeset, :changeset, attrs)
 
   @doc """
   Creates a new record with optional custom changeset function.
 
   ## Parameters
   - repo_module (module()) - Ecto.Repo module to use
-  - schema_module (module()) - Schema module for the record
+  - schema_module (module() | Ecto.Changeset.t()) - Schema module for the record
   - changeset_function (atom()) - Custom changeset function to use
   - attrs (map()) - Attributes for the new record
 
@@ -223,9 +223,23 @@ defmodule Aurora.Ctx.Core do
       })
       #=> {:ok, %Product{name: "Widget", status: "active"}}
   """
-  @spec create(module(), module(), atom(), map() | nil) ::
+  @spec create(module(), module() | Ecto.Changeset.t(), atom(), map() | nil) ::
           {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
-  def create(repo_module, schema_module, changeset_function \\ :changeset, attrs \\ %{}) do
+
+  def create(
+        repo_module,
+        schema_module_or_changeset,
+        changeset_function \\ :changeset,
+        attrs \\ %{}
+      )
+
+  def create(repo_module, %Ecto.Changeset{} = changeset, changeset_function, attrs) do
+    changeset
+    |> then(&apply(&1.data.__struct__, changeset_function, [&1, attrs]))
+    |> repo_module.insert()
+  end
+
+  def create(repo_module, schema_module, changeset_function, attrs) do
     schema_module.__struct__()
     |> then(&apply(schema_module, changeset_function, [&1, attrs]))
     |> repo_module.insert()
@@ -235,29 +249,42 @@ defmodule Aurora.Ctx.Core do
   Creates a new record, raising on errors.
 
   Parameters:
-  - repo_module (module) - Ecto.Repo to use
-  - schema_module (module) - Schema to create
-  - attrs (map) - Attributes for the new record
+  - repo_module (module()) - Ecto.Repo to use
+  - schema_module_or_changeset (module() | Ecto.Changeset.t()) - Schema to create
+  - attrs (map()) - Attributes for the new record
 
   Returns created schema or raises on error.
   """
-  @spec create!(module(), module(), map() | nil) :: Ecto.Schema.t()
-  def create!(repo_module, schema_module, %{} = attrs),
-    do: create!(repo_module, schema_module, :changeset, attrs)
+  @spec create!(module(), module() | Ecto.Changeset.t(), map() | nil) :: Ecto.Schema.t()
+  def create!(repo_module, schema_module_or_changeset, %{} = attrs),
+    do: create!(repo_module, schema_module_or_changeset, :changeset, attrs)
 
   @doc """
   Creates a new record, raising on errors.
 
   Parameters:
   - repo_module (module) - Ecto.Repo to use
-  - schema_module (module) - Schema to create
+  - schema_module_or_changeset (module | Ecto.Changeset) - Schema to create
   - changeset_function (atom) - Changeset function to use
   - attrs (map) - Attributes for the new record
 
   Returns created schema or raises on error.
   """
-  @spec create!(module(), module(), atom(), map() | nil) :: Ecto.Schema.t()
-  def create!(repo_module, schema_module, changeset_function \\ :changeset, attrs \\ %{}) do
+  @spec create!(module(), module() | Ecto.Changeset.t(), atom(), map() | nil) :: Ecto.Schema.t()
+  def create!(
+        repo_module,
+        schema_module_or_changeset,
+        changeset_function \\ :changeset,
+        attrs \\ %{}
+      )
+
+  def create!(repo_module, %Ecto.Changeset{} = changeset, changeset_function, attrs) do
+    changeset
+    |> then(&apply(&1.data.__struct__, changeset_function, [&1, attrs]))
+    |> repo_module.insert!()
+  end
+
+  def create!(repo_module, schema_module, changeset_function, attrs) do
     schema_module.__struct__()
     |> then(&apply(schema_module, changeset_function, [&1, attrs]))
     |> repo_module.insert!()
@@ -331,21 +358,23 @@ defmodule Aurora.Ctx.Core do
 
   Parameters:
   - repo_module (module) - Ecto.Repo to use
-  - entity (Ecto.Schema.t()) - Entity to update
+  - entity_or_changeset (Ecto.Schema.t() | Ecto.Changeset.t()) - Entity to update or changeset to apply
   - attrs (map) - Update attributes
 
   Returns {:ok, schema} on success, {:error, changeset} on failure.
   """
-  @spec update(module(), Ecto.Schema.t(), map() | nil) ::
+  @spec update(module(), Ecto.Schema.t() | Ecto.Changeset.t(), map() | nil) ::
           {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
-  def update(repo_module, entity, %{} = attrs), do: update(repo_module, entity, :changeset, attrs)
+
+  def update(repo_module, entity_or_changeset, %{} = attrs),
+    do: update(repo_module, entity_or_changeset, :changeset, attrs)
 
   @doc """
   Updates an entity using a specific changeset function.
 
   ## Parameters
   - repo_module (module()) - Ecto.Repo module to use
-  - entity (Ecto.Schema.t()) - Existing record to update
+  - entity_or_changeset (Ecto.Schema.t() | Ecto.Changeset.t()) - Existing record to update
   - changeset_function (atom()) - Custom changeset function
   - attrs (map()) - Update attributes
 
@@ -360,9 +389,17 @@ defmodule Aurora.Ctx.Core do
       Core.update(Repo, product, %{name: "New Name"})
       #=> {:ok, %Product{name: "New Name"}}
   """
-  @spec update(module(), Ecto.Schema.t(), atom(), map() | nil) ::
+  @spec update(module(), Ecto.Schema.t() | Ecto.Changeset.t(), atom(), map() | nil) ::
           {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
-  def update(repo_module, entity, changeset_function \\ :changeset, attrs \\ %{}) do
+  def update(repo_module, entity_or_changeset, changeset_function \\ :changeset, attrs \\ %{})
+
+  def update(repo_module, %Ecto.Changeset{} = changeset, changeset_function, attrs) do
+    changeset
+    |> then(&apply(changeset.data.__struct__, changeset_function, [&1, attrs]))
+    |> repo_module.update()
+  end
+
+  def update(repo_module, entity, changeset_function, attrs) do
     entity
     |> then(&apply(entity.__struct__, changeset_function, [&1, attrs]))
     |> repo_module.update()
@@ -372,19 +409,19 @@ defmodule Aurora.Ctx.Core do
   Creates a changeset for the given entity.
 
   Parameters:
-  - entity (Ecto.Schema.t()) - Entity for changeset
+  - entity_or_changeset (Ecto.Schema.t() | Ecto.Changeset.t()) - Entity for changeset
   - attrs (map) - Changeset attributes
 
   Returns Ecto.Changeset.
   """
   @spec change(Ecto.Schema.t() | Ecto.Changeset.t(), map() | nil) :: Ecto.Changeset.t()
-  def change(entity, %{} = attrs), do: change(entity, :changeset, attrs)
+  def change(entity_or_changeset, %{} = attrs), do: change(entity_or_changeset, :changeset, attrs)
 
   @doc """
   Creates a changeset for the given entity using a specific changeset function.
 
   ## Parameters
-  - entity (Ecto.Schema.t() | Ecto.Changeset.t()) - Existing record or changeset
+  - entity_or_changeset (Ecto.Schema.t() | Ecto.Changeset.t()) - Existing record or changeset
   - changeset_function (atom()) - Custom changeset function
   - attrs (map()) - Changeset attributes
 
@@ -402,7 +439,7 @@ defmodule Aurora.Ctx.Core do
       #=> #Ecto.Changeset<changes: %{status: "active"}>
   """
   @spec change(Ecto.Schema.t() | Ecto.Changeset.t(), atom(), map() | nil) :: Ecto.Changeset.t()
-  def change(changeset, changeset_function \\ :changeset, attrs \\ %{})
+  def change(entity_or_changeset, changeset_function \\ :changeset, attrs \\ %{})
 
   def change(%Ecto.Changeset{} = changeset, changeset_function, attrs) do
     apply(changeset.data.__struct__, changeset_function, [changeset, attrs])
@@ -413,13 +450,14 @@ defmodule Aurora.Ctx.Core do
   end
 
   @doc """
-  Initializes a new schema struct with optional attributes and preloads.
+  Initializes a new schema struct with optional attributes or options.
 
-  Parameters:
+  ## Parameters
   - repo_module (module) - Ecto.Repo to use
   - schema_module (module) - Schema to initialize
-  - attrs (map) - Initial attributes
-  - opts (keyword) - Optional preload parameters
+  - attrs_or_opts - One of:
+    - map: Initial attributes (will use empty options)
+    - keyword list: Options (will use empty attributes)
 
   Returns initialized schema struct.
   """
@@ -455,7 +493,7 @@ defmodule Aurora.Ctx.Core do
 
   Returns modified query.
   """
-  @spec exclude_clauses(Ecto.Query.t(), atom | [atom]) :: Ecto.Query.t()
+  @spec exclude_clauses(Ecto.Query.t(), atom() | list(atom())) :: Ecto.Query.t()
   def exclude_clauses(query, clauses) when is_list(clauses) do
     Enum.reduce(clauses, query, &Ecto.Query.exclude(&2, &1))
   end

@@ -29,13 +29,32 @@ The `opts` parameter supports:
 - `:order_by` - Sorting specification
 - `:paginate` - Pagination options (page, per_page)
 
+## Pagination Functions
+
+```elixir
+to_products_page(pagination, page)     # Returns %Pagination{} for specific page
+next_products_page(pagination)         # Returns %Pagination{} for next page
+previous_products_page(pagination)     # Returns %Pagination{} for previous page
+```
+
+### Example
+```elixir
+# Get paginated results
+page = list_products_paginated(paginate: %{page: 1, per_page: 20})
+
+# Navigate pages
+next_page = next_products_page(page)
+prev_page = previous_products_page(page)
+page5 = to_products_page(page, 5)
+```
+
 ## Get Functions
 
 ```elixir
 get_product(id)                # Returns %Product{} or nil
 get_product(id, opts)          # Returns %Product{} or nil with preloads
 get_product!(id)               # Returns %Product{} or raises Ecto.NoResultsError
-get_product!(id, opts)         # Returns %Product{} or raises, with preloads
+get_product!(id, opts)         # Returns %Product{} or raises, with given options
 ```
 
 ### Example
@@ -49,9 +68,11 @@ product = get_product!(1, preload: [:category])
 ```elixir
 create_product()               # Returns {:ok, %Product{}} with defaults
 create_product(attrs)          # Returns {:ok, %Product{}} or {:error, changeset}
-create_product!()              # Returns %Product{} or raises
-create_product!(attrs)         # Returns %Product{} or raises
+create_product!()              # Returns %Product{} or raises errors
+create_product!(attrs)         # Returns %Product{} or raises errors
 ```
+
+You can customize which changeset function is used for creation by providing the `:create_changeset` option when registering the schema.
 
 ### Example
 ```elixir
@@ -59,18 +80,52 @@ create_product!(attrs)         # Returns %Product{} or raises
   name: "Widget Pro",
   price: Decimal.new("29.99")
 })
+
+# Using a custom create changeset
+defmodule MyApp.Inventory do
+  use Aurora.Ctx
+  ctx_register_schema(Product, create_changeset: :create_changeset)
+end
 ```
 
 ## Update Functions
 
 ```elixir
-update_product(entity)         # Returns {:ok, %Product{}} with no changes
-update_product(entity, attrs)  # Returns {:ok, %Product{}} or {:error, changeset}
+update_product(entity)           # Returns {:ok, %Product{}} with no changes
+update_product(entity, attrs)    # Returns {:ok, %Product{}} or {:error, changeset}
+update_product(changeset)        # Returns {:ok, %Product{}} or {:error, changeset}
+update_product(changeset, attrs) # Returns {:ok, %Product{}} or {:error, changeset}
 ```
+
+The function accepts either:
+- An entity and optional attributes to apply changes
+- A pre-built changeset to validate and persist
+- A pre-built changeset and additional attributes to merge
+
+> **Note**: When using a pre-built changeset, it will be re-validated using the schema's defined `:update_changeset` function (or `:changeset` if not specified).
+
+You can use a custom update changeset function by providing the `:update_changeset` option when registering the schema.
 
 ### Example
 ```elixir
+# Using entity and attributes
 {:ok, updated} = update_product(product, %{price: Decimal.new("39.99")})
+
+# Using a pre-built changeset
+changeset = change_product(product, %{price: Decimal.new("39.99")})
+{:ok, updated} = update_product(changeset)
+
+# Using a changeset with additional attributes
+{:ok, updated} = 
+  product
+  |> change_product()
+  |> update_product(%{price: Decimal.new("39.99")})
+
+# Using a custom update changeset
+defmodule MyApp.Inventory do
+  use Aurora.Ctx
+  ctx_register_schema(Product, update_changeset: :custom_update_changeset)
+end
 ```
 
 ## Delete Functions
@@ -88,13 +143,36 @@ delete_product!(entity)        # Returns %Product{} or raises
 ## Change Functions
 
 ```elixir
-change_product(entity)         # Returns %Ecto.Changeset{} with no changes
-change_product(entity, attrs)  # Returns %Ecto.Changeset{} with changes
+change_product(entity)               # Returns %Ecto.Changeset{} with no changes
+change_product(entity, attrs)        # Returns %Ecto.Changeset{} with changes
+change_product(changeset)            # Returns %Ecto.Changeset{} with no changes
+change_product(changeset, attrs)     # Returns %Ecto.Changeset{} with changes
 ```
+
+The function accepts either:
+- An entity and optional attributes to apply changes
+- An existing changeset and optional attributes to merge changes
+
+> **Note**: When using a pre-built changeset, it will be re-validated using the schema's defined `:changeset` function (or the default changeset function if not specified).
+
+You can customize which changeset function is used by providing the `:changeset` option when registering the schema.
 
 ### Example
 ```elixir
+# Using entity
 changeset = change_product(product, %{price: Decimal.new("49.99")})
+
+# Using existing changeset
+updated_changeset = 
+  product
+  |> change_product(%{name: "Widget Pro"})
+  |> change_product(%{price: Decimal.new("49.99")})
+
+# Using custom changeset function
+defmodule MyApp.Inventory do
+  use Aurora.Ctx
+  ctx_register_schema(Product, changeset: :custom_changeset)
+end
 ```
 
 ## New Functions
@@ -102,46 +180,94 @@ changeset = change_product(product, %{price: Decimal.new("49.99")})
 ```elixir
 new_product()                  # Returns %Product{} struct
 new_product(attrs)             # Returns %Product{} with attributes
-new_product(attrs, opts)       # Returns %Product{} with attributes and preloads
+new_product(attrs, opts)       # Returns %Product{} with attributes and options applied
 ```
+
+The `opts` parameter supports:
+- `:preload` - Associations to preload when creating the struct
 
 ### Example
 ```elixir
+# Basic usage
 product = new_product(%{name: "Widget Pro", price: Decimal.new("29.99")})
+
+# With preloaded associations
+product = new_product(
+  %{name: "Widget Pro", price: Decimal.new("29.99")},
+  preload: [:category, :variants]
+)
 ```
+
+> **Note**: The `:changeset` option when registering a schema sets the default changeset function for all operations. This default is used for create and update operations unless explicitly overridden by `:create_changeset` or `:update_changeset` respectively.
 
 ## Query Options
 
+The following options are available for list, get, and count functions:
+
 ### Where Conditions
 ```elixir
-# Simple equality
+# Basic equality
 where: [status: :active]
+where: {:status, :active}
 
 # Comparisons
-where: {:price, :greater_than, 100}
-where: {:price, :less_than, 200}
-where: {:date, :greater_equal_than, ~D[2023-01-01]}
+where: {:price, :greater_than, 100}      # or :gt
+where: {:price, :greater_equal_than, 100} # or :ge
+where: {:price, :less_than, 200}         # or :lt
+where: {:price, :less_equal_than, 200}   # or :le
+where: {:price, :equal_to, 150}          # or :eq
 
 # Ranges
 where: {:price, :between, 100, 200}
 
-# Multiple conditions
-where: [status: :active, price: {:greater_than, 100}]
+# Multiple conditions (AND)
+where: [
+  status: :active,
+  {:price, :greater_than, 100}
+]
+
+# OR conditions
+where: [status: :active],
+or_where: [status: :pending]
+```
+
+### Preloading
+```elixir
+# Basic preloads
+preload: [:category]
+
+# Nested preloads
+preload: [
+  category: [:parent_category],
+  reviews: [:user, comments: [:user]]
+]
+
+# With query customization
+preload: [
+  reviews: from(r in Review, where: r.rating > 3)
+]
 ```
 
 ### Sorting
 ```elixir
-# Simple sort
-order_by: :inserted_at           # ascending
-order_by: {:desc, :inserted_at}  # descending
+# Basic sorting
+order_by: :inserted_at                 # asc
+order_by: {:desc, :price}             # desc
+
+# Null handling
+order_by: {:asc_nulls_last, :ended_at}
+order_by: {:desc_nulls_first, :priority}
 
 # Multiple fields
-order_by: [{:desc, :inserted_at}, {:asc, :name}]
+order_by: [
+  {:desc, :priority},
+  {:asc, :name}
+]
 ```
 
 ### Pagination
 ```elixir
-# Default pagination
+# Basic pagination
 paginate: %{page: 1, per_page: 20}
 ```
 

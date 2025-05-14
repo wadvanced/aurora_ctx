@@ -1,5 +1,13 @@
 # Changelog for v0.x
 
+## v0.1.3
+Requires Elixir v1.17+
+Compatible with Ecto 3.2+
+
+### Documentation fixes
+- README.md - logo added.
+- Hex docs - logo added.
+
 ## v0.1.2
 Requires Elixir v1.17+
 Compatible with Ecto 3.2+

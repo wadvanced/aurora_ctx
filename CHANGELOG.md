@@ -9,6 +9,7 @@ Compatible with Ecto 3.12+
 - Hex docs - logo added.
 - Functions.md - improved to reflect new functionalities.
 - Examples.md - Phoenix Liveview example added.
+- Modules - Modules documentation updated.
 
 ### Dependencies upgrade
 - ex_doc upgraded and locked from 0.38.1 to 0.38.2

@@ -1,6 +1,6 @@
 # Generated Functions Reference
 
-This guide details all the functions that Aurora.Ctx generates for your context modules. To illustrate the generated artifacts, we use as an example a schema module named 'Product' that has a table named 'products'.
+This guide details all the functions that Aurora.Ctx generates for your context modules. To illustrate the generated artifacts, we use, as an example, a schema module named 'Product' that has a table named 'products'.
 
 ## List Functions
 

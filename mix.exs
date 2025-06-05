@@ -2,7 +2,7 @@ defmodule Aurora.Ctx.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/wadvanced/aurora_ctx"
-  @version "0.1.2"
+  @version "0.1.3"
 
   def project do
     [
@@ -18,7 +18,7 @@ defmodule Aurora.Ctx.MixProject do
       aliases: aliases(),
 
       # Hex
-      description: "A DSL for exposing schema access functions in context modules",
+      description: "A macro set for exposing schema access functions in context modules",
       package: [
         maintainers: ["Federico Alcántara"],
         licenses: ["MIT"],
@@ -29,32 +29,7 @@ defmodule Aurora.Ctx.MixProject do
 
       # Docs
       name: "Aurora.Ctx",
-      docs: [
-        main: "overview",
-        source_ref: "v#{@version}",
-        source_url: @source_url,
-        skip_undefined_reference_warnings_on: [
-          Aurora.Ctx.Repo,
-          ~r/-local-.*/
-        ],
-        extras: [
-          "guides/overview.md",
-          "guides/functions.md",
-          "guides/examples.md",
-          "CHANGELOG.md"
-        ],
-        groups_for_extras: [
-          Guides: ~r/guides\/.?/
-        ],
-        groups_for_modules: [
-          Core: [
-            Aurora.Ctx
-          ],
-          Helpers: [
-            Aurora.Ctx.QueryBuilder
-          ]
-        ]
-      ]
+      docs: &docs/0
     ]
   end
 
@@ -94,6 +69,36 @@ defmodule Aurora.Ctx.MixProject do
       test: [
         "ctx.test.setup",
         "test"
+      ]
+    ]
+  end
+
+  defp docs do
+    [
+      main: "overview",
+      logo: "./guides/images/aurora_ctx-icon.png",
+      source_ref: "v#{@version}",
+      source_url: @source_url,
+      skip_undefined_reference_warnings_on: [
+        Aurora.Ctx.Repo,
+        ~r/-local-.*/
+      ],
+      extras: [
+        "guides/overview.md",
+        "guides/functions.md",
+        "guides/examples.md",
+        "CHANGELOG.md"
+      ],
+      groups_for_extras: [
+        Guides: ~r/guides\/.?/
+      ],
+      groups_for_modules: [
+        Core: [
+          Aurora.Ctx
+        ],
+        Helpers: [
+          Aurora.Ctx.QueryBuilder
+        ]
       ]
     ]
   end

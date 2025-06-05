@@ -1,8 +1,19 @@
 # Changelog for v0.x
 
+## v0.1.3
+Requires Elixir v1.17+
+Compatible with Ecto 3.12+
+
+### Documentation fixes
+- README.md - logo added.
+- Hex docs - logo added.
+
+### Dependencies upgrade
+- ex_doc upgraded and locked from 0.38.1 to 0.38.2
+
 ## v0.1.2
 Requires Elixir v1.17+
-Compatible with Ecto 3.2+
+Compatible with Ecto 3.12+
 
 ### Documentation fixes
 - README.md - more details added.

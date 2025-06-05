@@ -1,6 +1,12 @@
+<p align="center">
+  <picture>
+    <img src="./guides/images/aurora_ctx-logo.svg" height="200"/>
+  </picture>
+</p>
+
 # Aurora.Ctx
 
-A powerful DSL for automatically generating CRUD operations in Elixir context modules from Ecto schemas. Aurora.Ctx provides:
+A macro set for automatically generating CRUD operations in Elixir context modules from Ecto schemas. Aurora.Ctx provides:
 
 - Automatic CRUD function generation from Ecto schemas
 - Built-in pagination with navigation helpers
@@ -18,7 +24,7 @@ by adding `aurora_ctx` to your list of dependencies in `mix.exs`:
 ```elixir 
 def deps do
   [
-    {:aurora_ctx, "~> 0.1.2"}
+    {:aurora_ctx, "~> 0.1.3"}
   ]
 end
 ```

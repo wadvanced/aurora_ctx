@@ -58,7 +58,7 @@ active_count = count_products(where: [status: :active])
 
 ## Pagination Functions
 
-Functions to navigate through large datasets efficiently. See `Aurora.Ctx.Pagination` module for the full pagination implementation details and available methods.
+Functions to navigate through large datasets efficiently. See `Aurora.Ctx.Pagination` module for the pagination implementation details.
 
 ```elixir
 to_products_page(pagination, page)     # Returns %Pagination{} for specific page

@@ -4,9 +4,11 @@
 Requires Elixir v1.17+
 Compatible with Ecto 3.12+
 
-### Documentation fixes
+### Documentation update and fixes
 - README.md - logo added.
 - Hex docs - logo added.
+- Functions.md - improved to reflect new functionalities.
+- Examples.md - Phoenix Liveview example added.
 
 ### Dependencies upgrade
 - ex_doc upgraded and locked from 0.38.1 to 0.38.2
@@ -15,7 +17,7 @@ Compatible with Ecto 3.12+
 Requires Elixir v1.17+
 Compatible with Ecto 3.12+
 
-### Documentation fixes
+### Documentation update and fixes
 - README.md - more details added.
 - overview.md - description of pagination functions added.
 - functions.md - description of pagination functions.

@@ -19,6 +19,8 @@ defmodule Aurora.Ctx do
         )
       end
 
+  For detailed examples of using the generated functions, see [Examples Guide](examples.html).
+
   ## Generated Functions
 
   For a schema with source name "users" and module name "user", the following functions are generated:
@@ -177,12 +179,25 @@ defmodule Aurora.Ctx do
 
   ## Parameters
     * `schema_module` - The Ecto schema module to analyze
+    * `opts` - Options that affect function generation:
+      * `:infix` - Custom infix for singular function names
+      * `:plural_infix` - Custom infix for plural function names
 
   ## Returns
     * List of maps containing:
-      * `:type` - The function type (`:list`, `:create`, etc.)
-      * `:name` - The function name
-      * `:arity` - The function arity
+      * `:type` - The function type:
+        * `:list` - Functions that return collections of records
+        * `:list_paginated` - Functions that return paginated results
+        * `:count` - Functions that count records
+        * `:create` - Functions that create new records
+        * `:get` - Functions that fetch single records
+        * `:delete` - Functions that remove records
+        * `:change` - Functions that create changesets
+        * `:update` - Functions that modify records
+        * `:new` - Functions that initialize structs
+        * `:to_page`, `:next_page`, `:previous_page` - Pagination navigation
+      * `:name` - The generated function name as an atom
+      * `:arity` - The function arity (number of arguments)
   """
   @spec implementable_functions(module(), keyword) :: list()
   def implementable_functions(schema_module, opts \\ []) do

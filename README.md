@@ -90,5 +90,5 @@ delete_product!(product)           # Raising version
 For detailed usage examples and API reference, please see:
 
 - [HexDocs Documentation](https://hexdocs.pm/aurora_ctx)
-- [GitHub Repository](https://github.com/user/aurora_ctx)
+- [GitHub Repository](https://github.com/wadvanced/aurora_ctx)
 

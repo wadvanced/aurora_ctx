@@ -1,8 +1,10 @@
 # Generated Functions Reference
 
-This guide details all the functions that Aurora.Ctx generates for your context modules.
+This guide details all the functions that Aurora.Ctx generates for your context modules. To illustrate the generated artifacts, we use, as an example, a schema module named 'Product' that has a table named 'products'.
 
 ## List Functions
+
+Functions to fetch and filter collections of records from the database.
 
 ```elixir
 list_products()                # Returns [%Product{}]
@@ -28,8 +30,35 @@ The `opts` parameter supports:
 - `:or_where` - Alternative filter conditions combined with OR
 - `:order_by` - Sorting specification
 - `:paginate` - Pagination options (page, per_page)
+- `:limit` - Maximum number of records to return
+
+### Configuration
+
+Default pagination settings can be configured in your `config.exs`:
+
+```elixir
+config :aurora_ctx,
+  paginate: %{
+    page: 1,
+    per_page: 40  # default if not specified
+  }
+```
+
+### Count Functions
+
+The count functions support the same filtering options as list functions:
+
+```elixir
+# Get total count
+total = count_products()
+
+# Get filtered count
+active_count = count_products(where: [status: :active])
+```
 
 ## Pagination Functions
+
+Functions to navigate through large datasets efficiently. See `Aurora.Ctx.Pagination` module for the pagination implementation details.
 
 ```elixir
 to_products_page(pagination, page)     # Returns %Pagination{} for specific page
@@ -50,6 +79,8 @@ page5 = to_products_page(page, 5)
 
 ## Get Functions
 
+Functions to retrieve individual records by their primary key.
+
 ```elixir
 get_product(id)                # Returns %Product{} or nil
 get_product(id, opts)          # Returns %Product{} or nil with preloads
@@ -64,6 +95,8 @@ product = get_product!(1, preload: [:category])
 ```
 
 ## Create Functions
+
+Functions to insert new records into the database.
 
 ```elixir
 create_product()               # Returns {:ok, %Product{}} with defaults
@@ -89,6 +122,8 @@ end
 ```
 
 ## Update Functions
+
+Functions to modify existing records in the database.
 
 ```elixir
 update_product(entity)           # Returns {:ok, %Product{}} with no changes
@@ -130,6 +165,8 @@ end
 
 ## Delete Functions
 
+Functions to remove records from the database.
+
 ```elixir
 delete_product(entity)         # Returns {:ok, %Product{}} or {:error, changeset}
 delete_product!(entity)        # Returns %Product{} or raises
@@ -141,6 +178,8 @@ delete_product!(entity)        # Returns %Product{} or raises
 ```
 
 ## Change Functions
+
+Functions to prepare and validate changes before persisting them.
 
 ```elixir
 change_product(entity)               # Returns %Ecto.Changeset{} with no changes
@@ -176,6 +215,8 @@ end
 ```
 
 ## New Functions
+
+Functions to create new struct instances in memory.
 
 ```elixir
 new_product()                  # Returns %Product{} struct
@@ -263,6 +304,25 @@ order_by: [
   {:desc, :priority},
   {:asc, :name}
 ]
+```
+
+### Query Exclusions
+
+You can exclude specific query clauses when needed:
+
+```elixir
+# Exclude specific clauses
+products = list_products(
+  where: [status: :active],
+  exclude: :where  # Removes where clause
+)
+
+# Exclude multiple clauses
+products = list_products(
+  where: [status: :active],
+  order_by: [desc: :inserted_at],
+  exclude: [:where, :order_by]
+)
 ```
 
 ### Pagination

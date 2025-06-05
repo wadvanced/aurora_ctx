@@ -10,6 +10,7 @@ Compatible with Ecto 3.12+
 - Functions.md - improved to reflect new functionalities.
 - Examples.md - Phoenix Liveview example added.
 - Modules - Modules documentation updated.
+- Identity assets - logo and icons added.
 
 ### Dependencies upgrade
 - ex_doc upgraded and locked from 0.38.1 to 0.38.2

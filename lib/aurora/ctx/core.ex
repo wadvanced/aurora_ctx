@@ -5,8 +5,9 @@ defmodule Aurora.Ctx.Core do
   Provides functions for:
   - CRUD operations (create, read, update, delete)
   - Pagination (list_paginated, navigation)
-  - Query operations (count, list)
+  - Query operations (count, list) with filtering, sorting, and preloading
   - Record management (change, new)
+  - Query building and clause exclusion
   """
 
   import Ecto.Query
@@ -21,11 +22,7 @@ defmodule Aurora.Ctx.Core do
   ## Parameters
   - repo_module (module()) - Ecto.Repo module to use
   - schema_module (module()) - Schema module to query
-  - opts (keyword()) - Optional query parameters:
-    - `:where` - Filter conditions
-    - `:order_by` - Sort specifications
-    - `:preload` - Associations to preload
-    - `:limit` - Maximum number of records
+  - opts (keyword()) - Optional query parameters (see `Aurora.Ctx.QueryBuilder` for available options)
 
   ## Returns
   - list(Ecto.Schema.t())
@@ -57,11 +54,7 @@ defmodule Aurora.Ctx.Core do
   ## Parameters
   - repo_module (module()) - Ecto.Repo module to use
   - schema_module (module()) - Schema module to query
-  - opts (keyword()) - Query options including:
-    - `:paginate` - Pagination settings (%{page: integer, per_page: integer})
-    - `:where` - Filter conditions
-    - `:order_by` - Sort specifications
-    - `:preload` - Associations to preload
+  - opts (keyword()) - See `Aurora.Ctx.QueryBuilder` for available query options.
 
   ## Configuration
 
@@ -72,9 +65,11 @@ defmodule Aurora.Ctx.Core do
         per_page: 40
 
   If not configured, defaults to page: 1, per_page: 40.
+  Page navigation is safe - attempting to navigate beyond valid pages will return
+  the current page unchanged.
 
   ## Returns
-  - Aurora.Ctx.Pagination.t()
+  - `Aurora.Ctx.Pagination` struct.
 
   ## Examples
 
@@ -120,10 +115,20 @@ defmodule Aurora.Ctx.Core do
   Changes to a specific page in paginated results.
 
   Parameters:
-  - paginate (Pagination.t()) - Current pagination state
-  - page (integer) - Target page number
+    - paginate (Aurora.Ctx.Pagination.t()) - Current pagination state
+    - page (integer) - Target page number. If the requested page is out of range
+      (< 1 or > pages_count), returns the current page unchanged.
 
-  Returns updated Pagination struct with new page entries.
+  Example:
+      paginate = list_products_paginated(per_page: 20)
+      page5 = to_page(paginate, 5)  # Jumps directly to page 5
+
+      # Out of range page results in no change
+      page5 = to_page(paginate, 999) # Returns current page if 999 > pages_count
+
+  Returns:
+    - Aurora.Ctx.Pagination struct with entries for the target page, or unchanged
+      if the target page is out of range.
   """
   @spec to_page(Pagination.t() | map, integer) :: Pagination.t()
   def to_page(
@@ -146,9 +151,13 @@ defmodule Aurora.Ctx.Core do
   Moves to next page in paginated results.
 
   Parameters:
-  - paginate (Pagination.t()) - Current pagination state
+    - paginate (Aurora.Ctx.Pagination.t()) - Current pagination state containing
+      entries, page number, and other metadata. If already on the last page,
+      returns the current page unchanged.
 
-  Returns updated Pagination struct with next page entries.
+  Example:
+      paginate = list_products_paginated(per_page: 20)
+      next_page = next_page(paginate) # Moves to page 2
   """
   @spec next_page(Pagination.t() | map) :: Pagination.t()
   def next_page(%Pagination{page: page} = paginate), do: to_page(paginate, page + 1)
@@ -157,9 +166,13 @@ defmodule Aurora.Ctx.Core do
   Moves to previous page in paginated results.
 
   Parameters:
-  - paginate (Pagination.t()) - Current pagination state
+    - paginate (Aurora.Ctx.Pagination.t()) - Current pagination state containing
+      entries, page number, and other metadata. If already on page 1,
+      returns the first page unchanged.
 
-  Returns updated Pagination struct with previous page entries.
+  Example:
+      paginate = list_products_paginated(page: 2, per_page: 20)
+      prev_page = previous_page(paginate) # Moves back to page 1
   """
   @spec previous_page(Pagination.t() | map) :: Pagination.t()
   def previous_page(%Pagination{page: page} = paginate), do: to_page(paginate, page - 1)
@@ -489,9 +502,24 @@ defmodule Aurora.Ctx.Core do
 
   Parameters:
   - query (Ecto.Query.t()) - Query to modify
-  - clauses (atom | [atom]) - Clause(s) to exclude
+  - clauses (atom | [atom]) - Clause(s) to exclude. Available clauses:
+    - :where - WHERE conditions
+    - :select - SELECT clauses
+    - :order_by - ORDER BY clauses
+    - :group_by - GROUP BY clauses
+    - :having - HAVING conditions
+    - :limit - LIMIT clause
+    - :offset - OFFSET clause
+    - :preload - Preload associations
+    - :lock - Lock clauses
 
   Returns modified query.
+
+  ## Examples
+
+      query = from(p in Product)
+      exclude_clauses(query, :where)
+      exclude_clauses(query, [:select, :order_by])
   """
   @spec exclude_clauses(Ecto.Query.t(), atom() | list(atom())) :: Ecto.Query.t()
   def exclude_clauses(query, clauses) when is_list(clauses) do

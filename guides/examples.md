@@ -178,18 +178,6 @@ page5 = Inventory.to_products_page(page1, 5)
 
 #### Phoenix Example
 
-Router:
-```elixir
-scope "/", MyAppWeb do
-  pipe_through :browser
-  
-  resources "/products", ProductController
-  get "/products/page/:page", ProductController, :page
-  get "/products/next", ProductController, :next_page
-  get "/products/previous", ProductController, :previous_page
-end
-```
-
 Controller:
 ```elixir
 def index(conn, params) do
@@ -201,11 +189,9 @@ def index(conn, params) do
 end
 
 def page(conn, %{"page" => page}) do
-  current_page = conn.assigns.pagination
-  case Inventory.to_products_page(current_page, page) do
-    {:ok, new_page} -> render(conn, :index, pagination: new_page)
-    {:error, :invalid_page} -> redirect(conn, to: ~p"/products")
-  end
+  pagination = conn.assigns.pagination
+  new_page = Inventory.to_products_page(pagination, page)
+  render(conn, :index, pagination: new_page)
 end
 
 def next_page(conn, _params) do

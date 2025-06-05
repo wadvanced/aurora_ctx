@@ -52,6 +52,9 @@ defmodule Aurora.Ctx.QueryBuilder do
         sort: [desc: :inserted_at],
         paginate: %{page: 1, per_page: 20}
       )
+
+  For more advanced query examples including filtering, sorting, and associations,
+  see the [Query Usage Guide](examples.html#query-usage).
   """
   @spec options(Ecto.Query.t() | nil, keyword) :: Ecto.Query.t()
   def options(query, options \\ [])

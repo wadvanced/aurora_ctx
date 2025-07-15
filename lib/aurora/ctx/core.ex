@@ -367,7 +367,7 @@ defmodule Aurora.Ctx.Core do
   - clauses (keyword) - Clauses for getting the element
   - opts (keyword) - Optional query parameters
 
-  Returns found schema or nil if not found.
+  Returns found schema or nil if not found. If more than one is found raises Ecto.MultipleResultsError
   """
   @spec get_by(module(), module(), keyword(), keyword()) :: Ecto.Schema.t()
   def get_by(repo_module, schema_module, clauses, opts \\ []) do
@@ -386,7 +386,7 @@ defmodule Aurora.Ctx.Core do
   - clauses (keyword) - Clauses for getting the element
   - opts (keyword) - Optional query parameters
 
-  Returns found schema or raises Ecto.NoResultsError.
+  Returns found schema. Raises Ecto.NoResultsError or Ecto.MultipleResultsError.
   """
   @spec get_by!(module(), module(), keyword(), keyword()) :: Ecto.Schema.t()
   def get_by!(repo_module, schema_module, clauses, opts \\ []) do

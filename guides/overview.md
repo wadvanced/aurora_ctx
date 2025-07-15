@@ -158,7 +158,7 @@ defmodule MyApp.Inventory do
   # Separate changesets for create/update
   ctx_register_schema(Product,
     create_changeset: :creation_changeset,
-    update_changeset: :update_changeset
+    update_changeset: &MyCustomProductChangeset.update_changeset/2
   )
 end
 ```
@@ -189,6 +189,8 @@ For each schema, the following functions are automatically generated:
 ### Get Functions
 - `get_*(id, opts \\ [])` - Get a record by ID with optional preloads
 - `get_*!(id, opts \\ [])` - Get a record by ID with optional preloads (raises if not found)
+- `get_*_by(clauses, opts \\ [])` - Get a record by clauses and query options (raises if found more than one)
+- `get_*_by!(clauses), opts \\ [])` - Get a record by clauses and query options (raises if not found, or if more than one)
 
 ### Delete Functions
 - `delete_*(entity)` - Delete the given record

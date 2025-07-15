@@ -1,7 +1,7 @@
 # Changelog for v0.x
 
 ## v0.1.4
-Requires Elixir v1.17+
+Uses Elixir v1.18+
 Compatible with Ecto 3.12+
 
 ### Documentation update and fixes

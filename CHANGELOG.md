@@ -8,7 +8,6 @@ Compatible with Ecto 3.12+
 
 ### Features
 - Add get_by function generation.
-- New lightweight pagination struct.
 - Custom changeset functions can be defined by name or by function reference.
 
 ### Dependencies upgrade

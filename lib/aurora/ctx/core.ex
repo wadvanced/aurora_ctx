@@ -218,6 +218,8 @@ defmodule Aurora.Ctx.Core do
   - repo_module (module()) - Ecto.Repo module to use
   - schema_module (module() | Ecto.Changeset.t()) - Schema module for the record
   - changeset_function (atom()) - Custom changeset function to use
+    can be an atom representing the function name, or can be a reference to a function.
+    If it is an atom, the function is assumed to be located in the schema.
   - attrs (map()) - Attributes for the new record
 
   ## Returns
@@ -236,7 +238,7 @@ defmodule Aurora.Ctx.Core do
       })
       #=> {:ok, %Product{name: "Widget", status: "active"}}
   """
-  @spec create(module(), module() | Ecto.Changeset.t(), atom(), map() | nil) ::
+  @spec create(module(), module() | Ecto.Changeset.t(), atom() | function(), map() | nil) ::
           {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
 
   def create(
@@ -245,6 +247,13 @@ defmodule Aurora.Ctx.Core do
         changeset_function \\ :changeset,
         attrs \\ %{}
       )
+
+  def create(repo_module, changeset_or_entity, changeset_function, attrs)
+      when is_function(changeset_function, 2) do
+    changeset_or_entity
+    |> changeset_function.(attrs)
+    |> repo_module.insert()
+  end
 
   def create(repo_module, %Ecto.Changeset{} = changeset, changeset_function, attrs) do
     changeset
@@ -278,18 +287,26 @@ defmodule Aurora.Ctx.Core do
   Parameters:
   - repo_module (module) - Ecto.Repo to use
   - schema_module_or_changeset (module | Ecto.Changeset) - Schema to create
-  - changeset_function (atom) - Changeset function to use
+  - changeset_function (atom | function()) - Changeset function to use
   - attrs (map) - Attributes for the new record
 
   Returns created schema or raises on error.
   """
-  @spec create!(module(), module() | Ecto.Changeset.t(), atom(), map() | nil) :: Ecto.Schema.t()
+  @spec create!(module(), module() | Ecto.Changeset.t(), atom() | function(), map() | nil) ::
+          Ecto.Schema.t()
   def create!(
         repo_module,
         schema_module_or_changeset,
         changeset_function \\ :changeset,
         attrs \\ %{}
       )
+
+  def create!(repo_module, schema_module, changeset_function, attrs)
+      when is_function(changeset_function, 2) do
+    schema_module.__struct__()
+    |> changeset_function.(attrs)
+    |> repo_module.insert!()
+  end
 
   def create!(repo_module, %Ecto.Changeset{} = changeset, changeset_function, attrs) do
     changeset
@@ -426,7 +443,9 @@ defmodule Aurora.Ctx.Core do
   ## Parameters
   - repo_module (module()) - Ecto.Repo module to use
   - entity_or_changeset (Ecto.Schema.t() | Ecto.Changeset.t()) - Existing record to update
-  - changeset_function (atom()) - Custom changeset function
+  - changeset_function (atom() | function()) - Custom changeset function.
+    can be an atom representing the function name, or can be a reference to a function.
+    If it is an atom, the function is assumed to be located in the schema.
   - attrs (map()) - Update attributes
 
   ## Returns
@@ -440,9 +459,16 @@ defmodule Aurora.Ctx.Core do
       Core.update(Repo, product, %{name: "New Name"})
       #=> {:ok, %Product{name: "New Name"}}
   """
-  @spec update(module(), Ecto.Schema.t() | Ecto.Changeset.t(), atom(), map() | nil) ::
+  @spec update(module(), Ecto.Schema.t() | Ecto.Changeset.t(), atom() | function(), map() | nil) ::
           {:ok, Ecto.Schema.t()} | {:error, Ecto.Changeset.t()}
   def update(repo_module, entity_or_changeset, changeset_function \\ :changeset, attrs \\ %{})
+
+  def update(repo_module, changeset_or_entity, changeset_function, attrs)
+      when is_function(changeset_function, 2) do
+    changeset_or_entity
+    |> changeset_function.(attrs)
+    |> repo_module.update()
+  end
 
   def update(repo_module, %Ecto.Changeset{} = changeset, changeset_function, attrs) do
     changeset
@@ -473,7 +499,9 @@ defmodule Aurora.Ctx.Core do
 
   ## Parameters
   - entity_or_changeset (Ecto.Schema.t() | Ecto.Changeset.t()) - Existing record or changeset
-  - changeset_function (atom()) - Custom changeset function
+  - changeset_function (atom() | function()) - Custom changeset function.
+    can be an atom representing the function name, or can be a reference to a function.
+    If it is an atom, the function is assumed to be located in the schema.
   - attrs (map()) - Changeset attributes
 
   ## Returns
@@ -489,8 +517,14 @@ defmodule Aurora.Ctx.Core do
       Core.change(product, :custom_changeset, %{status: "active"})
       #=> #Ecto.Changeset<changes: %{status: "active"}>
   """
-  @spec change(Ecto.Schema.t() | Ecto.Changeset.t(), atom(), map() | nil) :: Ecto.Changeset.t()
+  @spec change(Ecto.Schema.t() | Ecto.Changeset.t(), atom() | function(), map() | nil) ::
+          Ecto.Changeset.t()
   def change(entity_or_changeset, changeset_function \\ :changeset, attrs \\ %{})
+
+  def change(changeset_or_entity, changeset_function, attrs)
+      when is_function(changeset_function, 2) do
+    changeset_function.(changeset_or_entity, attrs)
+  end
 
   def change(%Ecto.Changeset{} = changeset, changeset_function, attrs) do
     apply(changeset.data.__struct__, changeset_function, [changeset, attrs])

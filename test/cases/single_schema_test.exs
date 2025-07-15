@@ -47,6 +47,22 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
     assert_raise(Ecto.NoResultsError, fn -> context.get_product!(1005) end)
   end
 
+  test "Test get_by_product functions" do
+    context = __MODULE__.Inventory
+
+    create_sample_products(100)
+
+    assert [reference: "item_056"]
+           |> context.get_product_by()
+           |> Map.get(:reference) == "item_056"
+
+    assert []
+           |> context.get_product_by(where: [reference: "item_078"])
+           |> Map.get(:reference) == "item_078"
+
+    assert_raise(Ecto.NoResultsError, fn -> context.get_product_by!(reference: "item_1005") end)
+  end
+
   test "Test delete_product functions" do
     context = __MODULE__.Inventory
 

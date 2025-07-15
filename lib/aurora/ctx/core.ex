@@ -342,6 +342,44 @@ defmodule Aurora.Ctx.Core do
   end
 
   @doc """
+  Gets a record by filtering clauses.
+
+  Parameters:
+  - repo_module (module) - Ecto.Repo to use
+  - schema_module (module) - Schema to query
+  - clauses (keyword) - Clauses for getting the element
+  - opts (keyword) - Optional query parameters
+
+  Returns found schema or nil if not found.
+  """
+  @spec get_by(module(), module(), keyword(), keyword()) :: Ecto.Schema.t()
+  def get_by(repo_module, schema_module, clauses, opts \\ []) do
+    schema_module
+    |> from()
+    |> QueryBuilder.options(opts)
+    |> repo_module.get_by(clauses)
+  end
+
+  @doc """
+  Gets a record by filtering clauses.
+
+  Parameters:
+  - repo_module (module) - Ecto.Repo to use
+  - schema_module (module) - Schema to query
+  - clauses (keyword) - Clauses for getting the element
+  - opts (keyword) - Optional query parameters
+
+  Returns found schema or raises Ecto.NoResultsError.
+  """
+  @spec get_by!(module(), module(), keyword(), keyword()) :: Ecto.Schema.t()
+  def get_by!(repo_module, schema_module, clauses, opts \\ []) do
+    schema_module
+    |> from()
+    |> QueryBuilder.options(opts)
+    |> repo_module.get_by!(clauses)
+  end
+
+  @doc """
   Deletes the given entity.
 
   Parameters:

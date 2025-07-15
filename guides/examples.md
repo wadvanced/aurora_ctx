@@ -347,6 +347,19 @@ defmodule MyApp.Inventory.Product do
   end
 end
 
+defmodule MyApp.Inventory do
+  use Aurora.Ctx
+
+  alias MyApp.Inventory.Product
+
+  @ctx_repo_module MyApp.Repo
+
+  ctx_register_schema(Product,
+    create_changeset: :create_changeset,
+    changeset: :custom_changeset
+  )
+end
+
 # Usage of custom changesets
 # Create with custom create_changeset
 {:ok, product} = Inventory.create_product(%{

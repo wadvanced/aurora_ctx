@@ -94,6 +94,24 @@ get_product!(id, opts)         # Returns %Product{} or raises, with given option
 product = get_product!(1, preload: [:category])
 ```
 
+## Get by Functions
+
+Functions to retrieve individual records by their primary key.
+
+```elixir
+get_product_by(clauses)        # Returns %Product{} or nil, raises Ecto.MultipleResultsError if more than one is found
+get_product_by(clauses, opts)  # Returns %Product{} or nil with preloads, raises Ecto.MultipleResultsError if more than one is found
+get_product_by!(clauses)       # Returns %Product{}, can raise Ecto.NoResultsError or Ecto.MultipleResultsError
+get_product_by!(clauses, opts) # Returns %Product{} or raises, with given options
+```
+
+### Example
+```elixir
+# Get product by reference
+product = get_product_by!(reference: "The reference")
+```
+
+
 ## Create Functions
 
 Functions to insert new records into the database.

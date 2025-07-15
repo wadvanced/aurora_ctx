@@ -229,6 +229,10 @@ defmodule Aurora.Ctx do
       %{type: :get, name: "get_#{infix}", arity: 2},
       %{type: :get, name: "get_#{infix}!", arity: 1},
       %{type: :get, name: "get_#{infix}!", arity: 2},
+      %{type: :get_by, name: "get_#{infix}_by", arity: 1},
+      %{type: :get_by, name: "get_#{infix}_by", arity: 2},
+      %{type: :get_by, name: "get_#{infix}_by!", arity: 1},
+      %{type: :get_by, name: "get_#{infix}_by!", arity: 2},
       %{type: :delete, name: "delete_#{infix}", arity: 1},
       %{type: :delete, name: "delete_#{infix}!", arity: 1},
       %{type: :change, name: "change_#{infix}", arity: 1},
@@ -295,13 +299,19 @@ defmodule Aurora.Ctx do
   # list_products_paginated(opts)
   # count_products()
   # count_products(opts)
+  # get_product_by(clauses)
+  # get_product_by(clauses, opts)
+  # get_product_by!(clauses)
+  # get_product_by!(clauses, opts)
   # new_product()
   # new_product(attrs)
   # new_product(opts)
   # new_product(attrs, opts)
   @spec generate_function(map) :: Macro.t()
   defp generate_function(%{type: type, arity: arity} = function)
-       when type in [:list, :list_paginated, :count, :new] do
+       when type in [:list, :list_paginated, :count, :new, :get_by] do
+    core_function = core_function(function, function.type)
+
     args =
       case arity do
         1 -> [quote(do: arg1)]
@@ -312,7 +322,7 @@ defmodule Aurora.Ctx do
     quote do
       @doc false
       def unquote(function.name)(unquote_splicing(args)) do
-        apply(Ctx.Core, unquote(function.type), [
+        apply(Ctx.Core, unquote(core_function), [
           unquote(function.repo_module),
           unquote(function.schema_module),
           unquote_splicing(args)
@@ -453,7 +463,7 @@ defmodule Aurora.Ctx do
 
   defp generate_function(_func), do: quote(do: :ok)
 
-  @spec core_function(map, binary) :: atom
+  @spec core_function(map(), binary() | atom()) :: atom()
   defp core_function(function, core_function_name) do
     function.name
     |> to_string()
@@ -462,7 +472,7 @@ defmodule Aurora.Ctx do
     |> String.to_atom()
   end
 
-  @spec maybe_add_bang(boolean, binary) :: binary
+  @spec maybe_add_bang(boolean(), binary()) :: binary()
   defp maybe_add_bang(true, repo_function_name), do: "#{repo_function_name}!"
   defp maybe_add_bang(_, repo_function_name), do: "#{repo_function_name}"
 

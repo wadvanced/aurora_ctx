@@ -206,4 +206,16 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
     |> Core.list(Product, order_by: [desc: :reference])
     |> tap(&assert(List.first(&1).reference == "item_100"))
   end
+
+  test "Test get_by function" do
+    create_sample_products(100)
+
+    Repo
+    |> Core.get_by(Product, reference: "item_100")
+    |> tap(&assert(&1.reference == "item_100"))
+
+    Repo
+    |> Core.get_by(Product, [], where: [reference: "item_098"])
+    |> tap(&assert(&1.reference == "item_098"))
+  end
 end

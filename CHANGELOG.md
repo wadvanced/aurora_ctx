@@ -1,5 +1,21 @@
 # Changelog for v0.x
 
+## v0.1.4
+Requires Elixir v1.17+
+Compatible with Ecto 3.12+
+
+### Documentation update and fixes
+
+### Features
+- Add get_by function generation.
+- New lightweight pagination struct.
+- Custom changeset functions can be defined by name or by function reference.
+
+### Dependencies upgrade
+- `db_connection` - upgraded and locked from: 2.7.0 to 2.8.0
+- `ecto` - upgraded and locked from: 3.12.5 to 3.13.2
+- `ecto_sql` - upgraded and locked from: 3.12.1 to 3.13.2
+
 ## v0.1.3
 Requires Elixir v1.17+
 Compatible with Ecto 3.12+
@@ -13,7 +29,7 @@ Compatible with Ecto 3.12+
 - Identity assets - logo and icons added.
 
 ### Dependencies upgrade
-- ex_doc upgraded and locked from 0.38.1 to 0.38.2
+- `ex_doc` - upgraded and locked from: 0.38.1 to 0.38.2
 
 ## v0.1.2
 Requires Elixir v1.17+
@@ -44,7 +60,7 @@ Compatible with Ecto 3.2+
     - to_(plural_inflix)_page/2, next_(plural_inflix)_page/1, previous_(plural_inflix)_page/1 
 
 ### Upgraded dependencies
-- ex_doc - 0.37.2 to 0.38.3
+- `ex_doc` - upgraded and locked from 0.37.2 to 0.38.1
 
 ## v0.1.0
 

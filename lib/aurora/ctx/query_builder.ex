@@ -37,7 +37,7 @@ defmodule Aurora.Ctx.QueryBuilder do
   - :paginate (map) - Pagination options with keys:
     - :page (integer) - Page number
     - :per_page (integer) - Items per page
-  - :sort (atom | tuple | list) - Sorting options:
+  - :order_by (atom | tuple | list) - Sorting options:
     - field (atom | {:asc | :desc, field}) - Field to sort by ascending
     - fields ([{:asc | :desc, field}]) - List of sort fields specifications
 
@@ -49,7 +49,7 @@ defmodule Aurora.Ctx.QueryBuilder do
       QueryBuilder.options(query,
         where: [status: :active],
         preload: [:category],
-        sort: [desc: :inserted_at],
+        order_by: [desc: :inserted_at],
         paginate: %{page: 1, per_page: 20}
       )
 

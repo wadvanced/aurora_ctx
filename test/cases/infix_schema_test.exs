@@ -38,6 +38,7 @@ defmodule Aurora.Ctx.Test.Cases.InfixSchemaTest do
   test "Test get_product functions" do
     context = __MODULE__.Inventory
 
+    delete_all_products()
     items = create_sample_products(3)
 
     assert(items.id_1.id |> context.get_the_product() |> Map.get(:reference) == "item_1")
@@ -50,6 +51,7 @@ defmodule Aurora.Ctx.Test.Cases.InfixSchemaTest do
   test "Test delete_product functions" do
     context = __MODULE__.Inventory
 
+    delete_all_products()
     items = create_sample_products(3)
 
     assert(
@@ -74,6 +76,7 @@ defmodule Aurora.Ctx.Test.Cases.InfixSchemaTest do
   test "Test update_product function" do
     context = __MODULE__.Inventory
 
+    delete_all_products()
     items = create_sample_products(2)
 
     assert(
@@ -138,6 +141,7 @@ defmodule Aurora.Ctx.Test.Cases.InfixSchemaTest do
   test "Test list function" do
     context = __MODULE__.Inventory
 
+    delete_all_products()
     items = create_sample_products(100)
 
     assert(Enum.count(context.list_all_products()) == Enum.count(items))
@@ -145,6 +149,7 @@ defmodule Aurora.Ctx.Test.Cases.InfixSchemaTest do
 
   test "Test list filter functionality - where and or_where" do
     context = __MODULE__.Inventory
+    delete_all_products()
     create_sample_products(100)
 
     assert([where: {:reference, "item_001"}] |> context.list_all_products() |> Enum.count() == 1)
@@ -174,6 +179,16 @@ defmodule Aurora.Ctx.Test.Cases.InfixSchemaTest do
     )
 
     assert(
+      [where: [{:reference, :like, "item\\_00_"}]] |> context.list_all_products() |> Enum.count() ==
+        9
+    )
+
+    assert(
+      [where: [{:reference, :ilike, "ITEM\\_00%"}]] |> context.list_all_products() |> Enum.count() ==
+        9
+    )
+
+    assert(
       [where: {:reference, :between, "item_090", "item_095"}]
       |> context.list_all_products()
       |> Enum.count() == 6
@@ -191,6 +206,7 @@ defmodule Aurora.Ctx.Test.Cases.InfixSchemaTest do
 
   test "Test list bare pagination" do
     context = __MODULE__.Inventory
+    delete_all_products()
     create_sample_products(100)
 
     assert(
@@ -202,6 +218,7 @@ defmodule Aurora.Ctx.Test.Cases.InfixSchemaTest do
 
   test "Test bare count" do
     context = __MODULE__.Inventory
+    delete_all_products()
     create_sample_products(100)
 
     assert(context.count_all_products(paginate: %{page: 1, per_page: 10}) == 100)
@@ -216,6 +233,7 @@ defmodule Aurora.Ctx.Test.Cases.InfixSchemaTest do
 
   test "Test List pagination " do
     context = __MODULE__.Inventory
+    delete_all_products()
     create_sample_products(100)
 
     [paginate: %{per_page: 5}]
@@ -245,6 +263,7 @@ defmodule Aurora.Ctx.Test.Cases.InfixSchemaTest do
   end
 
   test "Test list sorting" do
+    delete_all_products()
     create_sample_products(100)
     context = __MODULE__.Inventory
 

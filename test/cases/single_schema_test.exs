@@ -38,6 +38,7 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
   test "Test get_product functions" do
     context = __MODULE__.Inventory
 
+    delete_all_products()
     items = create_sample_products(3)
 
     assert(items.id_1.id |> context.get_product() |> Map.get(:reference) == "item_1")
@@ -66,6 +67,7 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
   test "Test delete_product functions" do
     context = __MODULE__.Inventory
 
+    delete_all_products()
     items = create_sample_products(3)
 
     assert(
@@ -90,6 +92,7 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
   test "Test update_product function" do
     context = __MODULE__.Inventory
 
+    delete_all_products()
     items = create_sample_products(2)
 
     assert(
@@ -154,6 +157,7 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
   test "Test list function" do
     context = __MODULE__.Inventory
 
+    delete_all_products()
     items = create_sample_products(100)
 
     assert(Enum.count(context.list_products()) == Enum.count(items))
@@ -161,6 +165,7 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
 
   test "Test list filter functionality - where and or_where" do
     context = __MODULE__.Inventory
+    delete_all_products()
     create_sample_products(100)
 
     assert([where: {:reference, "item_001"}] |> context.list_products() |> Enum.count() == 1)
@@ -181,6 +186,15 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
 
     assert(
       [where: [{:reference, :le, "item_090"}]] |> context.list_products() |> Enum.count() == 90
+    )
+
+    assert(
+      [where: [{:reference, :like, "item\\_00_"}]] |> context.list_products() |> Enum.count() == 9
+    )
+
+    assert(
+      [where: [{:reference, :ilike, "ITEM\\_00%"}]] |> context.list_products() |> Enum.count() ==
+        9
     )
 
     assert(
@@ -212,6 +226,7 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
 
   test "Test bare count" do
     context = __MODULE__.Inventory
+    delete_all_products()
     create_sample_products(100)
 
     assert(context.count_products(paginate: %{page: 1, per_page: 10}) == 100)
@@ -226,6 +241,7 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
 
   test "Test List pagination " do
     context = __MODULE__.Inventory
+    delete_all_products()
     create_sample_products(100)
 
     [paginate: %{per_page: 5}]

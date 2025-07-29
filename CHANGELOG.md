@@ -1,10 +1,15 @@
 # Changelog for v0.x
 
-## v0.1.4
+## v0.1.5
 Uses Elixir v1.18+
 Compatible with Ecto 3.12+
 
-### Documentation update and fixes
+### Features
+- Added :like and :ilike conditions.
+
+## v0.1.4
+Uses Elixir v1.18+
+Compatible with Ecto 3.12+
 
 ### Features
 - Add get_by function generation.

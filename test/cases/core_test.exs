@@ -6,6 +6,7 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
   alias Aurora.Ctx.Test.Support.Inventory.Product
 
   test "Test create function" do
+    delete_all_products()
     {:ok, product} =
       Core.create(
         Repo,
@@ -17,6 +18,7 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
   end
 
   test "Test get functions" do
+    delete_all_products()
     %{id_1: item_1, id_2: item_2, id_3: item_3} = create_sample_products(3)
 
     assert Core.get(Repo, Product, item_1.id).reference == "item_1"
@@ -27,6 +29,7 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
   end
 
   test "Test delete functions" do
+    delete_all_products()
     items = create_sample_products(3)
 
     {:ok, deleted_item_2} = Core.delete(Repo, items.id_2)
@@ -41,6 +44,7 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
   end
 
   test "Test update function" do
+    delete_all_products()
     items = create_sample_products(2)
 
     {:ok, update_item_1} =
@@ -98,6 +102,7 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
   end
 
   test "Test list function" do
+    delete_all_products()
     items = create_sample_products(100)
 
     items_read = Core.list(Repo, Product)
@@ -105,6 +110,7 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
   end
 
   test "Test list filter functionality - where and or_where" do
+    delete_all_products()
     create_sample_products(100)
 
     assert(Repo |> Core.list(Product, where: {:reference, "item_001"}) |> Enum.count() == 1)
@@ -128,6 +134,14 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
     )
 
     assert(
+      Repo |> Core.list(Product, where: [{:reference, :like, "item\\_00_"}]) |> Enum.count() == 9
+    )
+
+    assert(
+      Repo |> Core.list(Product, where: [{:reference, :ilike, "ITEM\\_00%"}]) |> Enum.count() == 9
+    )
+
+    assert(
       Repo
       |> Core.list(Product, where: {:reference, :between, "item_090", "item_095"})
       |> Enum.count() == 6
@@ -144,6 +158,7 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
   end
 
   test "Test list bare pagination" do
+    delete_all_products()
     create_sample_products(100)
 
     assert(
@@ -154,6 +169,7 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
   end
 
   test "Test bare count" do
+    delete_all_products()
     create_sample_products(100)
 
     assert(Core.count(Repo, Product, paginate: %{page: 1, per_page: 10}) == 100)
@@ -167,6 +183,7 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
   end
 
   test "Test List pagination " do
+    delete_all_products()
     create_sample_products(100)
 
     Repo
@@ -196,6 +213,7 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
   end
 
   test "Test list sorting" do
+    delete_all_products()
     create_sample_products(100)
 
     Repo
@@ -208,6 +226,7 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
   end
 
   test "Test get_by function" do
+    delete_all_products()
     create_sample_products(100)
 
     Repo

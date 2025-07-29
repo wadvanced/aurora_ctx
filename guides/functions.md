@@ -275,6 +275,9 @@ where: {:price, :greater_equal_than, 100} # or :ge
 where: {:price, :less_than, 200}         # or :lt
 where: {:price, :less_equal_than, 200}   # or :le
 where: {:price, :equal_to, 150}          # or :eq
+where: {:reference, :like, "%item%"}
+where: {:reference, :like, "%Item%"}
+
 
 # Ranges
 where: {:price, :between, 100, 200}

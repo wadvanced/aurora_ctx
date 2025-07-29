@@ -6,6 +6,7 @@ defmodule Aurora.Ctx.Test.Support.Helper do
 
   alias Aurora.Ctx.Repo
   alias Aurora.Ctx.Test.Support.Inventory.Product
+  alias Aurora.Ctx.Test.Support.Inventory.ProductTransaction
 
   require Logger
 
@@ -28,7 +29,7 @@ defmodule Aurora.Ctx.Test.Support.Helper do
       products.id_2  # => 2
       products.id_3  # => 3
   """
-  @spec create_sample_products(integer) :: list()
+  @spec create_sample_products(integer) :: map()
   def create_sample_products(to) do
     length = to |> to_string() |> String.length()
 
@@ -46,6 +47,12 @@ defmodule Aurora.Ctx.Test.Support.Helper do
       |> then(&{String.to_atom("id_#{reference_id}"), &1})
     end)
     |> Map.new()
+  end
+
+  @spec delete_all_products() :: term()
+  def delete_all_products do
+    Repo.delete_all(ProductTransaction)
+    Repo.delete_all(Product)
   end
 
   @spec reference_id(integer, integer) :: binary

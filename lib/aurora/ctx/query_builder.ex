@@ -32,6 +32,9 @@ defmodule Aurora.Ctx.QueryBuilder do
       - :less_than, :lt - Less than
       - :less_equal_than, :le - Less than or equal
       - :equal_to, :eq - Equal to
+      - :like - Comparison string where the '%' represents any number of characters,
+          and the '_' represents any single character.
+      - :ilike - Similar to like, but ignores characters cases during comparison.
     - Range: `{:field, :between, start_value, end_value}`
   - :or_where (keyword | map | tuple) - Same as :where but combines with OR
   - :paginate (map) - Pagination options with keys:
@@ -138,6 +141,12 @@ defmodule Aurora.Ctx.QueryBuilder do
   defp where_condition({field, comparator, value}, query) when comparator in [:equal_to, :eq],
     do: from(q in query, where: field(q, ^field) == ^value)
 
+  defp where_condition({field, :like, value}, query),
+    do: from(q in query, where: q |> field(^field) |> like(^value))
+
+  defp where_condition({field, :ilike, value}, query),
+    do: from(q in query, where: q |> field(^field) |> ilike(^value))
+
   defp where_condition({field, :between, start_value, end_value}, query),
     do:
       from(q in query, where: field(q, ^field) >= ^start_value and field(q, ^field) <= ^end_value)
@@ -165,6 +174,12 @@ defmodule Aurora.Ctx.QueryBuilder do
 
   defp or_where_condition({field, comparator, value}, query) when comparator in [:equal_to, :eq],
     do: from(q in query, or_where: field(q, ^field) == ^value)
+
+  defp or_where_condition({field, :like, value}, query),
+    do: from(q in query, or_where: q |> field(^field) |> like(^value))
+
+  defp or_where_condition({field, :ilike, value}, query),
+    do: from(q in query, or_where: q |> field(^field) |> ilike(^value))
 
   defp or_where_condition({field, :between, start_value, end_value}, query),
     do:

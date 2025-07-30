@@ -121,6 +121,10 @@ products = Inventory.list_products(
   where: {:price, :between, Decimal.new("10.00"), Decimal.new("50.00")}
 )
 
+# Dynamic queries
+
+products = Inventory.list_products(where: dynamic([p], p.price >= 10 and p.price <= 50))
+
 # OR conditions
 products = Inventory.list_products(
   where: [status: "active"],
@@ -261,6 +265,37 @@ products = Inventory.list_products(
     reviews: from(r in Review, where: r.rating > 3)
   ]
 )
+```
+
+### Selecting fields
+```elixir
+# Just loading some fields
+Inventory.list_products(select: [:id, :reference, :name])
+iex> %Product{
+  id: 186940,
+  reference: "item_10",
+  name: "Item 10",
+  description: nil,
+  cost: nil,
+  ...
+}
+# Producing the fields contents as a list of fields without the schema struct using dynamic expressions
+Inventory.list_products(select: dynamic([p], [p.id, p.reference, p.name]))
+iex> [
+  [186931, "item_01", "Item 01"],
+  [186932, "item_02", "Item 02"],
+  [186933, "item_03", "Item 03"],
+  ...]
+
+# Producing a map with dynamic expressions.
+Inventory.list_products(select: dynamic([p], %{id: p.id, reference: p.reference, name: p.name}))
+iex> [
+  %{id: 163459, name: "Item 1", reference: "item_1"},
+  %{id: 186931, name: "Item 01", reference: "item_01"},
+  %{id: 186932, name: "Item 02", reference: "item_02"},
+  %{id: 186933, name: "Item 03", reference: "item_03"},
+  ...]
+
 ```
 
 ### Working with Transactions

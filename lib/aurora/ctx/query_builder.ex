@@ -26,7 +26,7 @@ defmodule Aurora.Ctx.QueryBuilder do
 
   ## Options
   - :preload (atom | list) - Associations to preload
-  - :where (keyword | map | tuple) - Filter conditions
+  - :where (keyword | map | tuple | dynamic_expr) - Filter conditions
     - Simple equality: `{:field, value}`
     - Comparison: `{:field, operator, value}` where operator can be:
       - :greater_than, :gt - Greater than
@@ -39,13 +39,15 @@ defmodule Aurora.Ctx.QueryBuilder do
       - :ilike - Similar to like, but ignores characters cases during comparison.
     - Range: `{:field, :between, start_value, end_value}`
     - Dynamic query: dynamic([p], p.reference == "item_001" or p.reference == "item_003")
-  - :or_where (keyword | map | tuple) - Same as :where but combines with OR
+  - :or_where (keyword | map | tuple, dynamic_expr) - Same as :where but combines with OR
   - :paginate (map) - Pagination options with keys:
     - :page (integer) - Page number
     - :per_page (integer) - Items per page
   - :order_by (atom | tuple | list) - Sorting options:
     - field (atom | {:asc | :desc, field}) - Field to sort by ascending
     - fields ([{:asc | :desc, field}]) - List of sort fields specifications
+  - :select (atom | list | dynamic_expr) - List of fields that will be read from table.
+    If a dynamic expression is used, you can get the list of fields, not the schema struct.
 
   ## Returns
   - Ecto.Query.t() - Modified query with all options applied
@@ -121,6 +123,19 @@ defmodule Aurora.Ctx.QueryBuilder do
 
   defp option(%Ecto.Query{} = query, {:order_by, field}) when is_atom(field) do
     from(q in query, order_by: [asc: ^field])
+  end
+
+  defp option(%Ecto.Query{} = query, {:select, fields}) when is_list(fields) do
+    from(query, select: ^fields)
+  end
+
+  defp option(%Ecto.Query{} = query, {:select, field}) when is_atom(field) do
+    fields = [field]
+    from(query, select: ^fields)
+  end
+
+  defp option(%Ecto.Query{} = query, {:select, %DynamicExpr{} = expression}) do
+    from(query, select: ^expression)
   end
 
   defp option(query, _option), do: query

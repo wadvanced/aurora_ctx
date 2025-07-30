@@ -30,7 +30,7 @@ The `opts` parameter supports:
 - `:or_where` - Alternative filter conditions combined with OR
 - `:order_by` - Sorting specification
 - `:paginate` - Pagination options (page, per_page)
-- `:limit` - Maximum number of records to return
+- `:select` - List of fields to include
 
 ### Configuration
 

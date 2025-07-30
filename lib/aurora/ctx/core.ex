@@ -600,6 +600,7 @@ defmodule Aurora.Ctx.Core do
 
   def exclude_clauses(query, clause) when is_atom(clause), do: Ecto.Query.exclude(query, clause)
 
+  ## PRIVATE
   @spec repo_preload(Ecto.Schema.t(), module(), keyword()) :: Ecto.Schema.t()
   defp repo_preload(entity, _repo_module, nil), do: entity
   defp repo_preload(entity, repo_module, preload), do: repo_module.preload(entity, preload)

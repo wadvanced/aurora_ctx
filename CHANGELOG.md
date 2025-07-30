@@ -5,7 +5,9 @@ Uses Elixir v1.18+
 Compatible with Ecto 3.12+
 
 ### Features
-- Added :like and :ilike conditions.
+- Where condition options
+  - :like and :ilike conditions 
+  - Dynamic queries - Ecto.Query.DynamicExpr are allowed as where options.
 
 ## v0.1.4
 Uses Elixir v1.18+

@@ -58,7 +58,7 @@ active_count = count_products(where: [status: :active])
 
 ## Pagination Functions
 
-Functions to navigate through large datasets efficiently. See `Aurora.Ctx.Pagination` module for the pagination implementation details.
+Functions to navigate through large datasets efficiently. See `Aurora.Ctx.Pagination` module for the pagination documentation details.
 
 ```elixir
 to_products_page(pagination, page)     # Returns %Pagination{} for specific page
@@ -96,13 +96,13 @@ product = get_product!(1, preload: [:category])
 
 ## Get by Functions
 
-Functions to retrieve individual records by their primary key.
+Functions to retrieve individual records with a list of where clauses.
 
 ```elixir
-get_product_by(clauses)        # Returns %Product{} or nil, raises Ecto.MultipleResultsError if more than one is found
-get_product_by(clauses, opts)  # Returns %Product{} or nil with preloads, raises Ecto.MultipleResultsError if more than one is found
-get_product_by!(clauses)       # Returns %Product{}, can raise Ecto.NoResultsError or Ecto.MultipleResultsError
-get_product_by!(clauses, opts) # Returns %Product{} or raises, with given options
+get_product_by(where_clauses)        # Returns %Product{} or nil, raises Ecto.MultipleResultsError if more than one is found
+get_product_by(where_clauses, opts)  # Returns %Product{} or nil with preloads, raises Ecto.MultipleResultsError if more than one is found
+get_product_by!(where_clauses)       # Returns %Product{}, can raise Ecto.NoResultsError or Ecto.MultipleResultsError
+get_product_by!(where_clauses, opts) # Returns %Product{} or raises, with given options
 ```
 
 ### Example
@@ -123,7 +123,7 @@ create_product!()              # Returns %Product{} or raises errors
 create_product!(attrs)         # Returns %Product{} or raises errors
 ```
 
-You can customize which changeset function is used for creation by providing the `:create_changeset` option when registering the schema.
+You can customize which changeset function is used for creation by providing the `:create_changeset` option when registering the schema. Any custom defined changeset function MUST have an arity of 2.
 
 ### Example
 ```elixir
@@ -132,10 +132,19 @@ You can customize which changeset function is used for creation by providing the
   price: Decimal.new("29.99")
 })
 
-# Using a custom create changeset
+# A custom `create changeset` configured by name
 defmodule MyApp.Inventory do
   use Aurora.Ctx
   ctx_register_schema(Product, create_changeset: :create_changeset)
+end
+``` 
+
+```elixir
+# Or a custom `create changeset` configured by its function reference
+alias MyApp.Inventory.Product
+defmodule MyApp.Inventory do
+  use Aurora.Ctx
+  ctx_register_schema(Product, create_changeset: &Product.create_changeset/2)
 end
 ```
 
@@ -158,6 +167,7 @@ The function accepts either:
 > **Note**: When using a pre-built changeset, it will be re-validated using the schema's defined `:update_changeset` function (or `:changeset` if not specified).
 
 You can use a custom update changeset function by providing the `:update_changeset` option when registering the schema.
+Any custom defined changeset function MUST have an arity of 2.
 
 ### Example
 ```elixir
@@ -174,10 +184,19 @@ changeset = change_product(product, %{price: Decimal.new("39.99")})
   |> change_product()
   |> update_product(%{price: Decimal.new("39.99")})
 
-# Using a custom update changeset
+# A custom `update changeset` configured by name
 defmodule MyApp.Inventory do
   use Aurora.Ctx
   ctx_register_schema(Product, update_changeset: :custom_update_changeset)
+end
+```
+
+```elixir
+# Or a custom `update changeset` configured by its function reference
+alias MyApp.Inventory.Product
+defmodule MyApp.Inventory do
+  use Aurora.Ctx
+  ctx_register_schema(Product, update_changeset: &Product.custom_update_changeset/2)
 end
 ```
 
@@ -213,6 +232,7 @@ The function accepts either:
 > **Note**: When using a pre-built changeset, it will be re-validated using the schema's defined `:changeset` function (or the default changeset function if not specified).
 
 You can customize which changeset function is used by providing the `:changeset` option when registering the schema.
+Any custom defined changeset function MUST have an arity of 2.
 
 ### Example
 ```elixir
@@ -225,10 +245,19 @@ updated_changeset =
   |> change_product(%{name: "Widget Pro"})
   |> change_product(%{price: Decimal.new("49.99")})
 
-# Using custom changeset function
+# A custom `changeset` configured by name
 defmodule MyApp.Inventory do
   use Aurora.Ctx
   ctx_register_schema(Product, changeset: :custom_changeset)
+end
+```
+
+```elixir
+# Or a custom `changeset` configured by its function reference
+alias MyApp.Inventory.Product
+defmodule MyApp.Inventory do
+  use Aurora.Ctx
+  ctx_register_schema(Product, changeset: &Product.custom_changeset/2)
 end
 ```
 
@@ -261,7 +290,7 @@ product = new_product(
 
 ## Query Options
 
-The following options are available for list, get, and count functions:
+The following options are available for list, get, get_by, and count functions:
 
 ### Where Conditions
 ```elixir
@@ -315,7 +344,7 @@ preload: [
 ### Sorting
 ```elixir
 # Basic sorting
-order_by: :inserted_at                 # asc
+order_by: :inserted_at                # asc
 order_by: {:desc, :price}             # desc
 
 # Null handling

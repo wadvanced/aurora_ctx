@@ -18,7 +18,7 @@ A macro set for automatically generating CRUD operations in Elixir context modul
 
 ## Installation
 
-[available in Hex](https://hex.pm/docs/publish), the package can be installed
+[Available in Hex](https://hex.pm/packages/aurora_ctx), the package can be installed
 by adding `aurora_ctx` to your list of dependencies in `mix.exs`:
 
 ```elixir 
@@ -50,7 +50,8 @@ end
 
 ### Generated Functions
 
-For a schema named `Product` with source "products", the following functions are automatically generated:
+For a schema named `Product` with table name: "products", several functions are automatically generated, 
+as shown in the examples:
 
 ```elixir
 # List operations with advanced filtering
@@ -60,6 +61,7 @@ list_products(                     # List with filters and sorting
   order_by: [desc: :inserted_at],
   preload: [:category]
 )
+count_products()                  # Count all products
 
 # Pagination with navigation
 page = list_products_paginated(
@@ -70,11 +72,12 @@ prev_page = previous_products_page(page)
 
 # Create with custom changeset
 create_product(%{name: "Item"})    # Uses default or specified changeset
-create_product!(%{name: "Item"})   # Raising version
+create_product!(%{name: "Item"})   # Raise on error version
 
-# Read with preloads
+# Read single records
 get_product(1, preload: [:category, reviews: [:user]])
-get_product!(1)                    # Raising version
+get_product!(1)                       # Raise on error version
+get_product_by(reference: "item_001") # Get record by using a filter
 
 # Update with custom changeset
 update_product(product, attrs)     # Uses default or specified changeset
@@ -82,13 +85,18 @@ change_product(product)            # Get changeset for forms
 
 # Delete operations
 delete_product(product)            # Returns {:ok, struct} or {:error, changeset}
-delete_product!(product)           # Raising version
+delete_product!(product)           # Raise on error version
+
+# New operation with preload
+new_product(preload: :product_transactions) # Returns a Product schema with product_transactions []
+
 ```
 
 ## Documentation 
 
 For detailed usage examples and API reference, please see:
 
-- [HexDocs Documentation](https://hexdocs.pm/aurora_ctx)
+- [Documentation](https://hexdocs.pm/aurora_ctx)
 - [GitHub Repository](https://github.com/wadvanced/aurora_ctx)
+- [Tests](https://github.com/wadvanced/aurora_ctx/tree/main/test)
 

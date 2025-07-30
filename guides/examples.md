@@ -122,7 +122,6 @@ products = Inventory.list_products(
 )
 
 # Dynamic queries
-
 products = Inventory.list_products(where: dynamic([p], p.price >= 10 and p.price <= 50))
 
 # OR conditions
@@ -157,7 +156,8 @@ products = Inventory.list_products(
 
 ### Controlled Pagination
 
-Implement and navigate through paginated results. Results are wrapped in an `Aurora.Ctx.Pagination` struct that provides additional metadata and navigation helpers.
+Implement and navigate through paginated results. 
+Results are wrapped in an `Aurora.Ctx.Pagination` struct that provides additional metadata and navigation helpers.
 
 ```elixir
 # Basic pagination with options
@@ -269,7 +269,7 @@ products = Inventory.list_products(
 
 ### Selecting fields
 ```elixir
-# Just loading some fields
+# Loading selected fields contents in the schema struct
 Inventory.list_products(select: [:id, :reference, :name])
 iex> %Product{
   id: 186940,
@@ -279,7 +279,7 @@ iex> %Product{
   cost: nil,
   ...
 }
-# Producing the fields contents as a list of fields without the schema struct using dynamic expressions
+# Producing a list of fields' contents without the schema struct using dynamic expressions
 Inventory.list_products(select: dynamic([p], [p.id, p.reference, p.name]))
 iex> [
   [186931, "item_01", "Item 01"],
@@ -391,7 +391,7 @@ defmodule MyApp.Inventory do
 
   ctx_register_schema(Product,
     create_changeset: :create_changeset,
-    changeset: :custom_changeset
+    changeset: &Product.custom_changeset/2
   )
 end
 
@@ -411,4 +411,4 @@ end
 changeset = Inventory.change_product(product, %{status: "inactive"})
 ```
 
-For more examples and use cases, check the test files in the [GitHub repository](https://github.com/wadvanced/aurora_ctx).
+For more examples and use cases, check the test files in the [GitHub repository](https://github.com/wadvanced/aurora_ctx/tree/main/test).

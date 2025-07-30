@@ -276,6 +276,31 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
     |> tap(&assert(List.last(&1.entries).reference == "item_055"))
   end
 
+  test "Test list pagination refresh" do
+    context = __MODULE__.Inventory
+    delete_all_products()
+    create_sample_products(100)
+
+    paginate =
+      [paginate: %{per_page: 5}, order_by: :reference]
+      |> context.list_products_paginated()
+      |> tap(&assert(Enum.count(&1.entries) == 5))
+      |> tap(&assert(List.first(&1.entries).name == "Item 001"))
+      |> tap(&assert(List.last(&1.entries).name == "Item 005"))
+
+    item_1 = List.first(paginate.entries)
+    item_5 = List.last(paginate.entries)
+
+    context.update_product(item_1, %{name: "New Item Name 001"})
+    context.update_product(item_5, %{name: "New Item Name 005"})
+
+    paginate
+    |> context.previous_products_page()
+    |> tap(&assert(Enum.count(&1.entries) == 5))
+    |> tap(&assert(List.first(&1.entries).name == "New Item Name 001"))
+    |> tap(&assert(List.last(&1.entries).name == "New Item Name 005"))
+  end
+
   test "Test list sorting" do
     create_sample_products(100)
     context = __MODULE__.Inventory

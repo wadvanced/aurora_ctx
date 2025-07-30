@@ -6,66 +6,74 @@ defmodule Aurora.Ctx do
   based on Ecto schemas. It simplifies the creation of context modules by
   automatically implementing common CRUD operations.
 
-  ## Usage
-
-      defmodule MyApp.Accounts do
-        use Aurora.Ctx
-
-        ctx_register_schema(User)
-        # or with options
-        ctx_register_schema(User, CustomRepo,
-          update_changeset: :custom_changeset,
-          create_changeset: :create_changeset
-        )
-      end
-
-  For detailed examples of using the generated functions, see [Examples Guide](examples.html).
-
   ## Generated Functions
 
   For a schema with source name "users" and module name "user", the following functions are generated:
 
   ### List Functions
-  - `list_users/0` - List all records
-  - `list_users/1` - List all records with options
-  - `list_users_paginated/0` - List records with pagination
-  - `list_users_paginated/1` - List records with pagination and options
-  - `count_users/0` - Count total records
-  - `count_users/1` - Count records with options
+  - `list_users/0` - Lists all records
+  - `list_users/1` - Lists all records with options
+  - `list_users_paginated/0` - Lists records with pagination
+  - `list_users_paginated/1` - Lists records with pagination and options
+  - `count_users/0` - Counts total records
+  - `count_users/1` - Counts records with options
 
   ### Pagination Functions
-  - `to_users_page/2` - Navigate to a specific page
-  - `next_users_page/1` - Navigate to the next page
-  - `previous_users_page/1` - Navigate to the previous page
+  - `to_users_page/2` - Navigates to a specific page
+  - `next_users_page/1` - Navigates to the next page
+  - `previous_users_page/1` - Navigates to the previous page
 
   ### Create Functions
-  - `create_user/0` - Create a record with empty attributes
-  - `create_user/1` - Create a record with given attributes
-  - `create_user!/0` - Create a record with empty attributes (raises on error)
-  - `create_user!/1` - Create a record with given attributes (raises on error)
+  - `create_user/0` - Creates a new record with empty attributes
+  - `create_user/1` - Creates a new record with given attributes
+  - `create_user!/0` - Creates a new record with empty attributes (raises on error)
+  - `create_user!/1` - Creates a new record with given attributes (raises on error)
 
   ### Get Functions
-  - `get_user/1` - Get a record by ID
-  - `get_user/2` - Get a record by ID with options
-  - `get_user!/1` - Get a record by ID (raises if not found)
-  - `get_user!/2` - Get a record by ID with options (raises if not found)
+  - `get_user/1` - Gets a record by ID
+  - `get_user/2` - Gets a record by ID with options
+  - `get_user!/1` - Gets a record by ID (raises if not found)
+  - `get_user!/2` - Gets a record by ID with options (raises if not found)
+
+  ### Get_by Functions
+  - `get_by_user/1` - Gets a record by filtering using where clauses
+  - `get_by_user/2` - Gets a record by filtering using where clauses and applying query options
+  - `get_by_user!/1` - Gets a record by filtering using where clauses (raises if not found)
+  - `get_by_user!/2` - Gets a record by filtering using where clauses and applying query options (raises if not found)
 
   ### Delete Functions
-  - `delete_user/1` - Delete a record
-  - `delete_user!/1` - Delete a record (raises on error)
+  - `delete_user/1` - Deletes a record
+  - `delete_user!/1` - Deletes a record (raises on error)
 
   ### Change Functions
-  - `change_user/1` - Create a changeset from a record
-  - `change_user/2` - Create a changeset from a record with attributes
+  - `change_user/1` - Creates a changeset from a record
+  - `change_user/2` - Creates a changeset from a record applying given attributes
 
   ### Update Functions
-  - `update_user/1` - Update a record
-  - `update_user/2` - Update a record with attributes
+  - `update_user/1` - Updates a record
+  - `update_user/2` - Updates a record with attributes
 
   ### New Functions
-  - `new_user/0` - Initialize a new struct
-  - `new_user/1` - Initialize a new struct with attributes
-  - `new_user/2` - Initialize a new struct with attributes and options
+  - `new_user/0` - Initializes a new struct
+  - `new_user/1` - Initializes a new struct with attributes
+  - `new_user/2` - Initializes a new struct with attributes and preload option
+
+  ## Usage Exanples
+  ```elixir
+    defmodule MyApp.Accounts do
+      use Aurora.Ctx
+
+      ctx_register_schema(User)
+      # or with options
+      ctx_register_schema(User, CustomRepo,
+        update_changeset: :custom_changeset,
+        create_changeset: :create_changeset
+      )
+    end
+  ```
+
+  For detailed examples of using the generated functions, see [Examples Guide](examples.html).
+  The generated functions are backed up by the module `Aurora.Ctx.Core`, see its documentation for detailed information.
   """
 
   alias Aurora.Ctx
@@ -104,9 +112,9 @@ defmodule Aurora.Ctx do
     * `opts` (keyword()) - (Optional) Configuration options:
       * `:changeset` (atom()) - A specific function to use for change function changesets (default: `:changeset`)
       * `:create_changeset` (atom()) - A specific function to use for creation changesets (defaults to the value of option `:changeset` or the function `:changeset`)
-      * `:infix` (binary) - The fixed part to use when constructing the functions' names.
+      * `:infix` (binary() | atom()) - The fixed part to use when constructing the functions' names.
           By default, is the lowercase of the module name (the last part of the full module name).
-      * `:plural_infix` (binary) - The fixed part to use when constructing the functions' names for plural functions.
+      * `:plural_infix` (binary() | atom()) - The fixed part to use when constructing the functions' names for plural functions.
           By default, uses the table name defined in the schema module.
       * `:update_changeset` (atom()) - The function to use for changesets (defaults to the value of option `:changeset` or the function `:changeset`)
 
@@ -204,11 +212,13 @@ defmodule Aurora.Ctx do
     plural_infix =
       opts
       |> get_option(:plural_infix, schema_module.__schema__(:source))
+      |> to_string()
       |> Macro.underscore()
 
     infix =
       opts
       |> get_option(:infix, schema_module |> Module.split() |> List.last())
+      |> to_string()
       |> Macro.underscore()
 
     [

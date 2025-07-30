@@ -2,6 +2,52 @@ defmodule Aurora.Ctx.QueryBuilder do
   @moduledoc """
   Provides functions for building and composing Ecto queries with common operations like filtering,
   sorting, pagination, and preloading associations.
+
+  ## Key Features
+
+  - **Flexible filtering**: Support for equality, comparison operators, ranges, and dynamic expressions
+  - **Pagination**: Built-in offset/limit pagination with page and per_page parameters
+  - **Sorting**: Multiple sort directions including null handling options
+  - **Association preloading**: Efficient loading of related data
+  - **Field selection**: Control which fields are returned from queries
+
+  ## Supported Filter Operations
+
+  - Equality: `{:field, value}`
+  - Comparisons: `:gt`, `:ge`, `:lt`, `:le`, `:eq`
+  - Pattern matching: `:like`, `:ilike`
+  - Range queries: `:between`
+  - Dynamic expressions for complex logic
+
+  ## Examples
+
+  ```elixir
+  # Basic filtering and sorting
+  query = from(p in Product)
+  QueryBuilder.options(query,
+    where: [status: :active, {:price, :gt, 100}],
+    order_by: [desc: :inserted_at],
+    preload: [:category]
+  )
+
+  # Pagination with multiple conditions
+  QueryBuilder.options(query,
+    where: [
+      status: :active,
+      {:price, :between, 50, 200},
+      {:name, :ilike, "%phone%"}
+    ],
+    paginate: %{page: 2, per_page: 10},
+    select: [:id, :name, :price]
+  )
+
+  # Using dynamic expressions
+  dynamic_filter = dynamic([p], p.category_id in ^category_ids)
+  QueryBuilder.options(query,
+    where: ^dynamic_filter,
+    select: [:id, :name, :price]
+  )
+  ```
   """
 
   import Ecto.Query
@@ -18,53 +64,60 @@ defmodule Aurora.Ctx.QueryBuilder do
   ]
 
   @doc """
-  Applies a list of query options to an Ecto query.
+  Applies query options to an Ecto query.
 
   ## Parameters
-  - query (Ecto.Query.t() | nil) - Core query to modify
-  - options (keyword) - List of query options to apply
+
+  - `query` (`Ecto.Query.t()` | `nil`) - Base query to modify
+  - `options` (`keyword()`) - Options to apply (see below)
 
   ## Options
-  - :preload (atom | list) - Associations to preload
-  - :where (keyword | map | tuple | dynamic_expr) - Filter conditions
+
+  ### Filtering
+  - `:where` - Conditions to filter by (AND logic):
     - Simple equality: `{:field, value}`
-    - Comparison: `{:field, operator, value}` where operator can be:
-      - :greater_than, :gt - Greater than
-      - :greater_equal_than, :ge - Greater than or equal
-      - :less_than, :lt - Less than
-      - :less_equal_than, :le - Less than or equal
-      - :equal_to, :eq - Equal to
-      - :like - Comparison string where the '%' represents any number of characters,
-          and the '_' represents any single character.
-      - :ilike - Similar to like, but ignores characters cases during comparison.
-    - Range: `{:field, :between, start_value, end_value}`
-    - Dynamic query: dynamic([p], p.reference == "item_001" or p.reference == "item_003")
-  - :or_where (keyword | map | tuple, dynamic_expr) - Same as :where but combines with OR
-  - :paginate (map) - Pagination options with keys:
-    - :page (integer) - Page number
-    - :per_page (integer) - Items per page
-  - :order_by (atom | tuple | list) - Sorting options:
-    - field (atom | {:asc | :desc, field}) - Field to sort by ascending
-    - fields ([{:asc | :desc, field}]) - List of sort fields specifications
-  - :select (atom | list | dynamic_expr) - List of fields that will be read from table.
-    If a dynamic expression is used, you can get the list of fields, not the schema struct.
+    - Comparison operators:
+      - `:greater_than`, `:gt` - Greater than
+      - `:greater_equal_than`, `:ge` - Greater than or equal
+      - `:less_than`, `:lt` - Less than
+      - `:less_equal_than`, `:le` - Less than or equal
+      - `:equal_to`, `:eq` - Equal to
+      - `:like` - Pattern matching with `%` (any chars) and `_` (single char)
+      - `:ilike` - Case-insensitive pattern matching
+    - Range operator:
+      - `:between` - Value should be within a start/end range
+    - Dynamic queries:
+      - `dynamic(bindings, query_expression)` - Can be used to build complex queries
+
+  - `:or_where` - Same as `:where` but with OR logic
+
+  ### Sorting
+  - `:order_by` - Sorting specification:
+    - Single field: `:name`
+    - Direction: `{:desc, :inserted_at}`
+    - Multiple: `[asc: :name, desc: :price]`
+
+  ### Pagination
+  - `:paginate` (`map()`) - Pagination options with keys:
+    - `:page` (`integer()`) - Page number (1-based)
+    - `:per_page` (`integer()`) - Items per page
+
+  ### Data Selection
+  - `:select` - Fields to return:
+    - Single: `:id`
+    - List: `[:id, :name]`
+    - Dynamic: `^dynamic_expr`
+
+  - `:preload` - Associations to load:
+    - Single: `:author`
+    - Nested: `[author: [:company]]`
 
   ## Returns
-  - Ecto.Query.t() - Modified query with all options applied
 
-  ## Examples
-      query = from(p in Product)
-      QueryBuilder.options(query,
-        where: [status: :active],
-        preload: [:category],
-        order_by: [desc: :inserted_at],
-        paginate: %{page: 1, per_page: 20}
-      )
+  `Ecto.Query.t()` | `nil` - Modified query or nil if input was nil
 
-  For more advanced query examples including filtering, sorting, and associations,
-  see the [Query Usage Guide](examples.html#query-usage).
   """
-  @spec options(Ecto.Query.t() | nil, keyword) :: Ecto.Query.t()
+  @spec options(Ecto.Query.t() | nil, keyword()) :: Ecto.Query.t() | nil
   def options(query, options \\ [])
   def options(nil, _options), do: nil
 
@@ -74,7 +127,8 @@ defmodule Aurora.Ctx.QueryBuilder do
 
   ## PRIVATE
 
-  @spec option(Ecto.Query.t(), tuple) :: Ecto.Query.t()
+  # Applies a single query option to the given query
+  @spec option(Ecto.Query.t(), tuple()) :: Ecto.Query.t()
   defp option(%Ecto.Query{} = query, {:preload, preload}),
     do: preload(query, ^preload)
 
@@ -140,7 +194,8 @@ defmodule Aurora.Ctx.QueryBuilder do
 
   defp option(query, _option), do: query
 
-  @spec where_condition(tuple() | Macro.t(), Ecto.Query.t()) :: Ecto.Query.t()
+  # Applies a WHERE condition to the query based on the condition type
+  @spec where_condition(tuple() | Ecto.Query.dynamic_expr(), Ecto.Query.t()) :: Ecto.Query.t()
   defp where_condition(%DynamicExpr{} = expression, query), do: from(query, where: ^expression)
 
   defp where_condition({field, value}, query),
@@ -175,7 +230,8 @@ defmodule Aurora.Ctx.QueryBuilder do
 
   defp where_condition(_where_condition, query), do: query
 
-  @spec or_where_condition(tuple() | Macro.t(), Ecto.Query.t()) :: Ecto.Query.t()
+  # Applies an OR WHERE condition to the query based on the condition type
+  @spec or_where_condition(tuple() | Ecto.Query.dynamic_expr(), Ecto.Query.t()) :: Ecto.Query.t()
   defp or_where_condition(%DynamicExpr{} = expression, query), do: from(query, where: ^expression)
 
   defp or_where_condition({field, value}, query),

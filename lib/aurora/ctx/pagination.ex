@@ -1,6 +1,25 @@
 defmodule Aurora.Ctx.Pagination do
   @moduledoc """
-  Struct for handling pagination state.
+  Provides a structured approach to handling pagination state in database queries and data
+  retrieval operations.
+
+  This module defines a struct that encapsulates all necessary pagination information including
+  options used for the initial records request, current page position, page size, total counts, and
+  the actual data entries. It supports configurable defaults and safe initialization
+  with automatic fallback to sensible defaults when invalid values are provided.
+
+  ## Configuration
+
+  Default pagination settings can be configured in your `config.exs`:
+
+  ```elixir
+  config :aurora_ctx, :pagination,
+    page: 1,
+    per_page: 40
+  ```
+
+  If not configured, defaults to `page: 1`, `per_page: 40`.
+
 
   ## Fields
 
@@ -12,16 +31,6 @@ defmodule Aurora.Ctx.Pagination do
   * `per_page` - Number of entries per page (default: 40)
   * `opts` - Additional query options passed to database operations
   * `entries` - List of records for the current page
-
-  ## Configuration
-
-  Default pagination settings can be configured in your `config.exs`:
-
-      config :aurora_ctx, :pagination,
-        page: 1,
-        per_page: 40
-
-  If not configured, defaults to page: 1, per_page: 40.
   """
 
   @type t :: %__MODULE__{
@@ -54,12 +63,12 @@ defmodule Aurora.Ctx.Pagination do
   Creates a new pagination struct with safe defaults from the application configuration.
   Delegates to new/1 with the configured defaults.
 
-  Any invalid configuration values will be replaced with system defaults:
-  - page: 1
-  - per_page: 40
+  Any invalid configuration values will be replaced with pagination defaults.
 
-  Returns:
-    t()
+  ## Returns
+
+  Returns a `t()` struct with default values applied.
+
   """
   @spec new() :: t()
   def new, do: new(@default_pagination)
@@ -67,18 +76,21 @@ defmodule Aurora.Ctx.Pagination do
   @doc """
   Creates a new pagination struct with the given attributes.
 
-  Parameters:
-    - attrs (map | keyword): Pagination attributes
-      - :page (pos_integer): Page number (default: 1)
-      - :per_page (pos_integer): Items per page (default: 40)
-      - :opts (keyword): Additional query options to be passed to database operations
-      - :entries (list): Initial list of entries for the current page
+  Validates and normalizes input attributes, ensuring that `page` and `per_page` are positive
+  integers. Invalid or missing values are replaced with safe defaults.
 
-  Any invalid or negative values for :page or :per_page will be replaced with defaults.
-  Empty or invalid :opts and :entries will be initialized as empty lists.
+  ## Parameters
 
-  Returns:
-    t()
+  - attrs (`map()` | `keyword()`) - Pagination attributes
+    - `:page` (`pos_integer()`) - Page number (default: 1)
+    - `:per_page` (`pos_integer()`) - Items per page (default: 40)
+    - `:opts` (`keyword()`) - Additional query options for database operations
+    - `:entries` (`list()`) - Initial list of entries for the current page
+
+  ## Returns
+
+  Returns a `t()` struct with validated and normalized values.
+
   """
   @spec new(map() | keyword()) :: t()
   def new(attrs) when is_list(attrs), do: attrs |> Enum.into(%{}) |> new()
@@ -94,7 +106,8 @@ defmodule Aurora.Ctx.Pagination do
 
   ## PRIVATE
 
-  @spec get_positive_integer(map, atom, integer) :: integer
+  # Extracts a positive integer value from a map, falling back to default if invalid
+  @spec get_positive_integer(map(), atom(), integer()) :: integer()
   defp get_positive_integer(map, key, default) do
     case Map.get(map, key, default) do
       value when is_integer(value) and value > 0 -> value

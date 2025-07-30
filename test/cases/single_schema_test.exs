@@ -292,4 +292,46 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
     |> context.list_products()
     |> tap(&assert(List.first(&1).reference == "item_100"))
   end
+
+  test "Test select options" do
+    delete_all_products()
+    create_sample_products(1)
+    context = __MODULE__.Inventory
+
+    [select: :reference]
+    |> context.list_products()
+    |> List.first()
+    |> tap(&assert(&1.reference == "item_1"))
+    |> tap(&assert(&1.id == nil))
+
+    [select: [:id, :reference]]
+    |> context.list_products()
+    |> List.first()
+    |> tap(&assert(&1.reference == "item_1"))
+    |> tap(&refute(&1.id == nil))
+
+    [select: dynamic([p], %{reference: p.reference, id: nil})]
+    |> context.list_products()
+    |> List.first()
+    |> tap(&assert(&1.reference == "item_1"))
+    |> tap(&assert(&1.id == nil))
+
+    delete_all_products()
+    create_sample_products(10)
+
+    assert [select: dynamic([p], [p.reference])]
+           |> context.list_products()
+           |> List.flatten() == [
+             "item_01",
+             "item_02",
+             "item_03",
+             "item_04",
+             "item_05",
+             "item_06",
+             "item_07",
+             "item_08",
+             "item_09",
+             "item_10"
+           ]
+  end
 end

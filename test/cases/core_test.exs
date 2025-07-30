@@ -246,4 +246,45 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
     |> Core.get_by(Product, [], where: [reference: "item_098"])
     |> tap(&assert(&1.reference == "item_098"))
   end
+
+  test "Test select options" do
+    delete_all_products()
+    create_sample_products(1)
+
+    Repo
+    |> Core.list(Product, select: :reference)
+    |> List.first()
+    |> tap(&assert(&1.reference == "item_1"))
+    |> tap(&assert(&1.id == nil))
+
+    Repo
+    |> Core.list(Product, select: [:id, :reference])
+    |> List.first()
+    |> tap(&assert(&1.reference == "item_1"))
+    |> tap(&refute(&1.id == nil))
+
+    Repo
+    |> Core.list(Product, select: dynamic([p], %{reference: p.reference, id: nil}))
+    |> List.first()
+    |> tap(&assert(&1.reference == "item_1"))
+    |> tap(&assert(&1.id == nil))
+
+    delete_all_products()
+    create_sample_products(10)
+
+    assert Repo
+           |> Core.list(Product, select: dynamic([p], [p.reference]))
+           |> List.flatten() == [
+             "item_01",
+             "item_02",
+             "item_03",
+             "item_04",
+             "item_05",
+             "item_06",
+             "item_07",
+             "item_08",
+             "item_09",
+             "item_10"
+           ]
+  end
 end

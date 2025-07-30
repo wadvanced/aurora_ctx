@@ -6,6 +6,8 @@ defmodule Aurora.Ctx.QueryBuilder do
 
   import Ecto.Query
 
+  alias Ecto.Query.DynamicExpr
+
   @sort_directions [
     :asc,
     :asc_nulls_last,
@@ -36,6 +38,7 @@ defmodule Aurora.Ctx.QueryBuilder do
           and the '_' represents any single character.
       - :ilike - Similar to like, but ignores characters cases during comparison.
     - Range: `{:field, :between, start_value, end_value}`
+    - Dynamic query: dynamic([p], p.reference == "item_001" or p.reference == "item_003")
   - :or_where (keyword | map | tuple) - Same as :where but combines with OR
   - :paginate (map) - Pagination options with keys:
     - :page (integer) - Page number
@@ -63,16 +66,18 @@ defmodule Aurora.Ctx.QueryBuilder do
   def options(query, options \\ [])
   def options(nil, _options), do: nil
 
-  def options(query, options) do
+  def options(query, options) when is_list(options) do
     Enum.reduce(options, query, &option(&2, &1))
   end
+
+  ## PRIVATE
 
   @spec option(Ecto.Query.t(), tuple) :: Ecto.Query.t()
   defp option(%Ecto.Query{} = query, {:preload, preload}),
     do: preload(query, ^preload)
 
   defp option(%Ecto.Query{} = query, {:where, conditions})
-       when is_list(conditions) or is_map(conditions) do
+       when is_list(conditions) or is_non_struct_map(conditions) do
     Enum.reduce(conditions, query, &where_condition/2)
   end
 
@@ -81,7 +86,7 @@ defmodule Aurora.Ctx.QueryBuilder do
   end
 
   defp option(%Ecto.Query{} = query, {:or_where, conditions})
-       when is_list(conditions) or is_map(conditions) do
+       when is_list(conditions) or is_non_struct_map(conditions) do
     Enum.reduce(conditions, query, &or_where_condition/2)
   end
 
@@ -120,7 +125,9 @@ defmodule Aurora.Ctx.QueryBuilder do
 
   defp option(query, _option), do: query
 
-  @spec where_condition(tuple, Ecto.Query.t()) :: Ecto.Query.t()
+  @spec where_condition(tuple() | Macro.t(), Ecto.Query.t()) :: Ecto.Query.t()
+  defp where_condition(%DynamicExpr{} = expression, query), do: from(query, where: ^expression)
+
   defp where_condition({field, value}, query),
     do: from(q in query, where: field(q, ^field) == ^value)
 
@@ -153,7 +160,9 @@ defmodule Aurora.Ctx.QueryBuilder do
 
   defp where_condition(_where_condition, query), do: query
 
-  @spec or_where_condition(tuple, Ecto.Query.t()) :: Ecto.Query.t()
+  @spec or_where_condition(tuple() | Macro.t(), Ecto.Query.t()) :: Ecto.Query.t()
+  defp or_where_condition(%DynamicExpr{} = expression, query), do: from(query, where: ^expression)
+
   defp or_where_condition({field, value}, query),
     do: from(q in query, or_where: field(q, ^field) == ^value)
 

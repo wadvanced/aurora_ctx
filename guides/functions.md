@@ -278,9 +278,11 @@ where: {:price, :equal_to, 150}          # or :eq
 where: {:reference, :like, "%item%"}
 where: {:reference, :like, "%Item%"}
 
-
 # Ranges
 where: {:price, :between, 100, 200}
+
+# Dynamic queries
+where: dynamic([p], p.reference in ["item_001", "item_045", "item_063"])
 
 # Multiple conditions (AND)
 where: [

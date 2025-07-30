@@ -211,6 +211,12 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
       |> context.list_products()
       |> Enum.count() == 7
     )
+
+    assert(
+      [where: dynamic([p], p.reference in ["item_001", "item_045", "item_063"])]
+      |> context.list_products()
+      |> Enum.count() == 3
+    )
   end
 
   test "Test list bare pagination" do

@@ -7,6 +7,7 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
 
   test "Test create function" do
     delete_all_products()
+
     {:ok, product} =
       Core.create(
         Repo,
@@ -154,6 +155,14 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
         or_where: {:reference, :eq, "item_001"}
       )
       |> Enum.count() == 7
+    )
+
+    assert(
+      Repo
+      |> Core.list(Product,
+        where: dynamic([p], p.reference in ["item_001", "item_045", "item_063"])
+      )
+      |> Enum.count() == 3
     )
   end
 

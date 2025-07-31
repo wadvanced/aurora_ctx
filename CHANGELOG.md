@@ -12,6 +12,7 @@ Compatible with Ecto 3.12+
   - List of fields to load from table specified as option.  
 
 ### Documentation update and fixes
+- Guides documentation updated
 - New CONTRIBUTORS.md documentation
 
 ## v0.1.4

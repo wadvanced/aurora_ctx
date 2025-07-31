@@ -196,7 +196,7 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
     create_sample_products(100)
 
     Repo
-    |> Core.list_paginated(Product, paginate: %{per_page: 5})
+    |> Core.list_paginated(Product, paginate: %{per_page: 5}, order_by: :reference)
     |> tap(&(assert(&1.entries_count) == 100))
     |> tap(&(assert(&1.pages_count) == 10))
     |> tap(&assert(Enum.count(&1.entries) == 5))
@@ -219,6 +219,30 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
     |> tap(&assert(Enum.count(&1.entries) == 5))
     |> tap(&assert(List.first(&1.entries).reference == "item_051"))
     |> tap(&assert(List.last(&1.entries).reference == "item_055"))
+  end
+
+  test "Test list pagination refresh" do
+    delete_all_products()
+    create_sample_products(100)
+
+    paginate =
+      Repo
+      |> Core.list_paginated(Product, paginate: %{per_page: 5}, order_by: :reference)
+      |> tap(&assert(Enum.count(&1.entries) == 5))
+      |> tap(&assert(List.first(&1.entries).name == "Item 001"))
+      |> tap(&assert(List.last(&1.entries).name == "Item 005"))
+
+    item_1 = List.first(paginate.entries)
+    item_5 = List.last(paginate.entries)
+
+    Core.update(Repo, item_1, %{name: "New Item Name 001"})
+    Core.update(Repo, item_5, %{name: "New Item Name 005"})
+
+    paginate
+    |> Core.previous_page()
+    |> tap(&assert(Enum.count(&1.entries) == 5))
+    |> tap(&assert(List.first(&1.entries).name == "New Item Name 001"))
+    |> tap(&assert(List.last(&1.entries).name == "New Item Name 005"))
   end
 
   test "Test list sorting" do

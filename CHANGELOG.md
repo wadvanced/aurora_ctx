@@ -6,10 +6,14 @@ Compatible with Ecto 3.12+
 
 ### Features
 - Where condition options
-  - :like and :ilike conditions 
-  - Dynamic queries - Ecto.Query.DynamicExpr are allowed as where options.
+  - :like and :ilike conditions in where options
+  - Dynamic queries - Ecto.Query.DynamicExpr allowed in where options.
 - Select option (:select)
-  - List of fields to load from table can be specified as an option.  
+  - List of fields to load from table specified as option.  
+
+### Documentation update and fixes
+- Guides documentation updated
+- New CONTRIBUTORS.md documentation
 
 ## v0.1.4
 Uses Elixir v1.18+

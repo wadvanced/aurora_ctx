@@ -100,3 +100,6 @@ For detailed usage examples and API reference, please see:
 - [GitHub Repository](https://github.com/wadvanced/aurora_ctx)
 - [Tests](https://github.com/wadvanced/aurora_ctx/tree/main/test)
 
+## Want to contribute?
+
+Read the [guidelines.](https://github.com/wadvanced/aurora_ctx/blob/main/CONTRIBUTORS.md)

@@ -126,7 +126,7 @@ If you need help with your contribution, feel free to:
 - Refer to existing tests for examples
 
 ## Useful links
-[Aurora framework](https://github.com/wadvanced/aurora)
-[Aurora.ctx documentation](https://hexdocs.pm/aurora_ctx)
-[Ecto documentation](https://hexdocs.pm/ecto)
-[ExDoc documentation](https://hexdocs.pm/ex_doc)
+- [Aurora framework](https://github.com/wadvanced/aurora)
+- [Aurora.ctx documentation](https://hexdocs.pm/aurora_ctx)
+- [Ecto documentation](https://hexdocs.pm/ecto)
+- [ExDoc documentation](https://hexdocs.pm/ex_doc)

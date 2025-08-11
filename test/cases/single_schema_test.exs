@@ -250,7 +250,7 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
     delete_all_products()
     create_sample_products(100)
 
-    [paginate: %{per_page: 5}]
+    [paginate: %{per_page: 5}, order_by: :reference]
     |> context.list_products_paginated()
     |> tap(&(assert(&1.entries_count) == 100))
     |> tap(&(assert(&1.pages_count) == 10))
@@ -274,6 +274,42 @@ defmodule Aurora.Ctx.Test.Cases.SingleSchemaTest do
     |> tap(&assert(Enum.count(&1.entries) == 5))
     |> tap(&assert(List.first(&1.entries).reference == "item_051"))
     |> tap(&assert(List.last(&1.entries).reference == "item_055"))
+  end
+
+  test "Test List pagination DEFAULTS " do
+    context = __MODULE__.Inventory
+
+    delete_all_products()
+    create_sample_products(900)
+
+    [order_by: :reference]
+    |> context.list_products_paginated()
+    |> tap(&(assert(&1.entries_count) == 900))
+    |> tap(&(assert(&1.pages_count) == 40))
+    |> tap(&assert(Enum.count(&1.entries) == 40))
+    |> tap(&assert(List.first(&1.entries).reference == "item_001"))
+    |> tap(&assert(List.last(&1.entries).reference == "item_040"))
+    |> context.next_products_page()
+    |> tap(&assert(Enum.count(&1.entries) == 40))
+    |> tap(&assert(List.first(&1.entries).reference == "item_041"))
+    |> tap(&assert(List.last(&1.entries).reference == "item_080"))
+    |> context.previous_products_page()
+    |> tap(&assert(Enum.count(&1.entries) == 40))
+    |> tap(&assert(List.first(&1.entries).reference == "item_001"))
+    |> tap(&assert(List.last(&1.entries).reference == "item_040"))
+    ## Should stay in the same page since there are only
+    |> context.to_products_page(30)
+    |> tap(&assert(Enum.count(&1.entries) == 40))
+    |> tap(&assert(List.first(&1.entries).reference == "item_001"))
+    |> tap(&assert(List.last(&1.entries).reference == "item_040"))
+    |> context.to_products_page(11)
+    |> tap(&assert(Enum.count(&1.entries) == 40))
+    |> tap(&assert(List.first(&1.entries).reference == "item_401"))
+    |> tap(&assert(List.last(&1.entries).reference == "item_440"))
+    |> context.to_products_page(10)
+    |> tap(&assert(Enum.count(&1.entries) == 40))
+    |> tap(&assert(List.first(&1.entries).reference == "item_361"))
+    |> tap(&assert(List.last(&1.entries).reference == "item_400"))
   end
 
   test "Test list pagination refresh" do

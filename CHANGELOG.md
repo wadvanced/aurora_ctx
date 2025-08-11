@@ -1,5 +1,12 @@
 # Changelog for v0.x
 
+## v0.1.6
+Uses Elixir v1.18+
+Compatible with Ecto 3.12+
+
+### Fixes
+- Pagination fails when relying on the default per_page value.
+
 ## v0.1.5
 Uses Elixir v1.18+
 Compatible with Ecto 3.12+

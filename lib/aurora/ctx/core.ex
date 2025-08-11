@@ -222,9 +222,11 @@ defmodule Aurora.Ctx.Core do
       )
       when page >= 1 and page <= pages_count do
     opts =
-      paginate.opts[:paginate]
+      paginate.opts
+      |> Keyword.get(:paginate, %{})
+      |> Map.put_new(:per_page, paginate.per_page)
       |> Map.put(:page, page)
-      |> then(&Keyword.replace(paginate.opts, :paginate, &1))
+      |> then(&Keyword.put(paginate.opts, :paginate, &1))
 
     Map.merge(paginate, %{page: page, entries: list(repo_module, schema_module, opts)})
   end
@@ -238,7 +240,7 @@ defmodule Aurora.Ctx.Core do
         _page
       ) do
     opts =
-      Keyword.put(opts, :paginate, %{per_page: opts[:paginate].per_page, page: paginate.page})
+      Keyword.put(opts, :paginate, %{per_page: paginate.per_page, page: paginate.page})
 
     Map.merge(paginate, %{entries: list(repo_module, schema_module, opts)})
   end

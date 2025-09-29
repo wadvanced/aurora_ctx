@@ -1,3 +1,7 @@
+[![CI](https://github.com/wadvanced/aurora_ctx/actions/workflows/ci.yml/badge.svg](https://github.com/wadvanced/aurora_ctx/actions/workflows/ci.yml)
+
+
+
 <p align="center">
   <picture>
     <img src="./guides/images/aurora_ctx-logo.svg" height="200"/>

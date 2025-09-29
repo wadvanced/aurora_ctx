@@ -1,3 +1,6 @@
+![CI](https://img.shields.io/github/actions/workflow/status/wadvanced/aurora_ctx/ci.yml?branch=main&style=for-the-badge&label=CI/CD)
+
+
 <p align="center">
   <picture>
     <img src="./guides/images/aurora_ctx-logo.svg" height="200"/>

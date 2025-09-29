@@ -1,5 +1,4 @@
-[![CI](https://github.com/wadvanced/aurora_ctx/actions/workflows/ci.yml/badge.svg](https://github.com/wadvanced/aurora_ctx/actions/workflows/ci.yml)
-
+[![CI](https://github.com/wadvanced/aurora_ctx/actions/workflows/ci.yml/badge.svg)](https://github.com/wadvanced/aurora_ctx/actions/workflows/ci.yml)
 
 
 <p align="center">

@@ -1,10 +1,10 @@
 [![CI](https://github.com/wadvanced/aurora_ctx/actions/workflows/ci.yml/badge.svg)](https://github.com/wadvanced/aurora_ctx/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/hexpm/v/aurora_ctx.svg)](https://hex.pm/packages/aurora_ctx)
-[![Total Downloads](https://img.shields.io/hexpm/dt/aurora_ctx.svg)](https://hex.pm/packages/aurora_ctx)
-[![License](https://img.shields.io/hexpm/l/aurora_ctx.svg)](https://github.com/wadvanced/aurora_ctx/blob/master/LICENSE)
-[![Last Updated](https://img.shields.io/github/last-commit/wadvanced/aurora_ctx.svg)](https://github.com/wadvanced/aurora_ctx/commits/master)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org)
 [![Documentation](https://img.shields.io/badge/documentation-gray)](https://hexdocs.pm/aurora_ctx/)
-
+[![Hex.pm](https://img.shields.io/hexpm/v/[your-repo].svg)](https://hex.pm/packages/[your-repo])
+[![License](https://img.shields.io/hexpm/l/aurora_ctx.svg)](https://github.com/wadvanced/aurora_ctx/blob/master/LICENSE)
+(https://github.com/wadvanced/aurora_ctx/commits/master)
+[![Total Downloads](https://img.shields.io/hexpm/dt/aurora_ctx.svg)](https://hex.pm/packages/aurora_ctx)
 
 <p align="center">
   <picture>

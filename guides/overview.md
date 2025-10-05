@@ -17,7 +17,7 @@ Add `aurora_ctx` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:aurora_ctx, "~> 0.1.6"}
+    {:aurora_ctx, "~> 0.1.7"}
   ]
 end
 ```

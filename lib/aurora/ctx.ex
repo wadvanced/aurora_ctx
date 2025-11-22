@@ -294,6 +294,7 @@ defmodule Aurora.Ctx do
       implemented_functions
       |> Enum.reject(&Module.defines?(context_module, {&1.name, &1.arity}, :def))
       |> Enum.map(&generate_function/1)
+      |> tap(&IO.puts(Macro.to_string(&1)))
 
     quote do
       unquote(imports)
@@ -439,7 +440,7 @@ defmodule Aurora.Ctx do
   # update_product(entity, attrs)
   defp generate_function(%{type: :update, arity: arity} = function) do
     args = if arity > 1, do: [quote(do: entity), quote(do: attrs)], else: [quote(do: entity)]
-    attrs = if arity > 1, do: [quote(do: attrs)], else: []
+    attrs = if arity > 1, do: [quote(do: attrs)], else: [Macro.escape(%{})]
 
     quote do
       @doc false

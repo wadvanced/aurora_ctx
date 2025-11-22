@@ -110,4 +110,4 @@ For detailed usage examples and API reference, please see:
 
 ## Want to contribute?
 
-Read the [guidelines.](https://github.com/wadvanced/aurora_ctx/blob/main/CONTRIBUTORS.md)
+Read the [guidelines.](https://github.com/wadvanced/aurora_ctx/blob/main/CONTRIBUTING.md)

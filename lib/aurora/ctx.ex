@@ -408,11 +408,13 @@ defmodule Aurora.Ctx do
   # change_product(entity, attrs)
   defp generate_function(%{type: :change, arity: arity} = function) do
     args = if arity > 1, do: [quote(do: entity), quote(do: attrs)], else: [quote(do: entity)]
+    specs = if arity > 1, do: [quote(do: any()), quote(do: any())], else: [quote(do: any())]
 
     core_function_call =
       if arity > 1 do
         quote do
           @doc false
+          @spec unquote(function.name)(unquote_splicing(specs)) :: any()
           def unquote(function.name)(unquote_splicing(args)) do
             Ctx.Core.change(entity, unquote(function.changeset), attrs)
           end
@@ -420,8 +422,9 @@ defmodule Aurora.Ctx do
       else
         quote do
           @doc false
+          @spec unquote(function.name)(unquote_splicing(specs)) :: any()
           def unquote(function.name)(unquote_splicing(args)) do
-            Ctx.Core.change(entity, unquote(function.changeset))
+            Ctx.Core.change(entity, unquote(function.changeset), %{})
           end
         end
       end

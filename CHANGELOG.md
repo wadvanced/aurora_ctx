@@ -7,12 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## v0.1.9
+- Uses Elixir v1.18+
+- Compatible with Ecto 3.12+
+
+### Fixed
+- Dialyzir failure on generated update functions.
+
 ## v0.1.8
 - Uses Elixir v1.18+
 - Compatible with Ecto 3.12+
 
 ### Fixed
-- Dialyzir failure on generated change and update functions.
+- Dialyzir failure on generated change functions.
 
 ### Changed
 - `credo` upgraded from 1.7.12 to 1.7.13

@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## v0.1.8
+- Uses Elixir v1.18+
+- Compatible with Ecto 3.12+
 
 ### Fixed
 - Dialyzir failure on generated change and update functions.

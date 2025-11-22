@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## v0.1.8
 
+### Fixed
+- Dialyzir failure on generated change and update functions.
+
 ### Changed
 - `credo` upgraded from 1.7.12 to 1.7.13
 - `dialyxir` upgraded from 1.4.6 to 1.4.7 
@@ -17,9 +20,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## v0.1.7
 - Uses Elixir v1.18+
 - Compatible with Ecto 3.12+
-
-### Fixed
-- Dialyzir failure on generated change and update functions.
 
 ### Changed
 - `ex_doc` upgraded from 0.38.2 to 0.38.4

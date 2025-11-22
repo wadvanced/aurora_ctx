@@ -439,7 +439,7 @@ defmodule Aurora.Ctx do
   # update_product(entity, attrs)
   defp generate_function(%{type: :update, arity: arity} = function) do
     args = if arity > 1, do: [quote(do: entity), quote(do: attrs)], else: [quote(do: entity)]
-    attrs = if arity > 1, do: [quote(do: attrs)], else: []
+    attrs = if arity > 1, do: [quote(do: attrs)], else: [Macro.escape(%{})]
 
     quote do
       @doc false

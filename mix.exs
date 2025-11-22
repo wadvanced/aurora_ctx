@@ -2,7 +2,7 @@ defmodule Aurora.Ctx.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/wadvanced/aurora_ctx"
-  @version "0.1.8"
+  @version "0.1.9"
 
   def project do
     [

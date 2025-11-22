@@ -294,7 +294,6 @@ defmodule Aurora.Ctx do
       implemented_functions
       |> Enum.reject(&Module.defines?(context_module, {&1.name, &1.arity}, :def))
       |> Enum.map(&generate_function/1)
-      |> tap(&IO.puts(Macro.to_string(&1)))
 
     quote do
       unquote(imports)

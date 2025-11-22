@@ -21,6 +21,7 @@ Thank you for your interest in contributing to Aurora.Ctx! This guide will help 
 4.  **Add tests** for any new functionality.
 5.  **Update the documentation** if you've changed the API.
 6.  **Ensure your code lints** by running `mix consistency`.
+7.  **Pass all the tests** with `mix test`.
 7.  **Issue that pull request!**
 
 ## Project Structure
@@ -210,7 +211,8 @@ There are several manual prompts useful for AI chat. Keep in mind that each AI p
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by the [Code of Conduct](https://github.com/wadvanced/.github/blob/main/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. Please report unacceptable behavior to wadvanced@wadvanced.com.
+This project and everyone participating in it is governed by the [Code of Conduct](https://github.com/wadvanced/.github/blob/main/CODE_OF_CONDUCT.md). By participating, you are expected to uphold this code. 
+Please report unacceptable behavior to support@wadvanced.com.
 
 ## Need Help?
 

@@ -32,7 +32,7 @@ by adding `aurora_ctx` to your list of dependencies in `mix.exs`:
 ```elixir 
 def deps do
   [
-    {:aurora_ctx, "~> 0.1.7"}
+    {:aurora_ctx, "~> 0.1.8"}
   ]
 end
 ```
@@ -110,4 +110,4 @@ For detailed usage examples and API reference, please see:
 
 ## Want to contribute?
 
-Read the [guidelines.](https://github.com/wadvanced/aurora_ctx/blob/main/CONTRIBUTORS.md)
+Read the [guidelines.](https://github.com/wadvanced/aurora_ctx/blob/main/CONTRIBUTING.md)

@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## v0.1.9
 ### Changed
 - `credo` upgraded from 1.7.13 to 1.7.15
-- ˋecto_sqlˋ upgraded from 3.13.2 to 3.13.5
+- `ecto_sql` upgraded from 3.13.2 to 3.13.5
 - `ex_doc` upgraded from 0.39.1 to 0.39.3
 
 ## v0.1.9

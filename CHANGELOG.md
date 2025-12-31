@@ -8,14 +8,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## v0.1.9
-- Uses Elixir v1.18+
+### Changed
+- `credo` upgraded from 1.7.13 to 1.7.15
+- ˋecto_sqlˋ upgraded from 3.13.2 to 3.13.5
+- `ex_doc` upgraded from 0.39.1 to 0.39.3
+
+## v0.1.9
+- Uses Elixir v1.17+
 - Compatible with Ecto 3.12+
 
 ### Fixed
 - Dialyzir failure on generated update functions.
 
 ## v0.1.8
-- Uses Elixir v1.18+
+- Uses Elixir v1.17+
 - Compatible with Ecto 3.12+
 
 ### Fixed
@@ -27,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ex_doc` upgraded from 0.38.4 to 0.39.1 
  
 ## v0.1.7
-- Uses Elixir v1.18+
+- Uses Elixir v1.17+
 - Compatible with Ecto 3.12+
 
 ### Changed
@@ -39,14 +45,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - adoption of [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
 
 ## v0.1.6
-- Uses Elixir v1.18+
+- Uses Elixir v1.17+
 - Compatible with Ecto 3.12+
 
 ### Fixed
 - Pagination fails when relying on the default per_page value.
 
 ## v0.1.5
-- Uses Elixir v1.18+
+- Uses Elixir v1.17+
 - Compatible with Ecto 3.12+
 
 ### Added
@@ -61,7 +67,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New CONTRIBUTORS.md documentation
 
 ## v0.1.4
-- Uses Elixir v1.18+
+- Uses Elixir v1.17+
 - Compatible with Ecto 3.12+
 
 ### Added

@@ -26,7 +26,7 @@ products = list_products(
 
 The `opts` parameter supports:
 - `:preload` - Associations to preload
-- `:where` - Filter conditions (equality, comparison, range)
+- `:where` - Filter conditions (equality, comparison, membership, range)
 - `:or_where` - Alternative filter conditions combined with OR
 - `:order_by` - Sorting specification
 - `:paginate` - Pagination options (page, per_page)
@@ -310,6 +310,10 @@ where: {:reference, :like, "%Item%"}
 # Ranges
 where: {:price, :between, 100, 200}
 
+# Membership
+where: {:reference, :in, ["item_001", "item_045"]}
+where: {:reference, :in, "item_001,item_045"}   # comma-separated binary, split on ","
+
 # Dynamic queries
 where: dynamic([p], p.reference in ["item_001", "item_045", "item_063"])
 
@@ -323,6 +327,8 @@ where: [
 where: [status: :active],
 or_where: [status: :pending]
 ```
+
+`:or_where` accepts the same conditions as `:where`. A condition that matches none of the forms above raises `ArgumentError` (`unsupported where condition: ...`, `unsupported or_where condition: ...`) instead of being ignored.
 
 ### Preloading
 ```elixir

@@ -60,15 +60,15 @@ Depends on: none
    ```
 
 ##### Acceptance criteria
-- [ ] AC-1: the CHANGELOG entry sits under `## [Unreleased]` and carries no
+- [x] AC-1: the CHANGELOG entry sits under `## [Unreleased]` and carries no
       issue-link suffix (mechanical — no red test; verified by
       `git diff origin/main...HEAD -- CHANGELOG.md | grep -E '^\+.*\[#[0-9]+\]'` returning nothing)
-- [ ] AC-2: no file outside the documentation set modified, apart from this issue's spec file
+- [x] AC-2: no file outside the documentation set modified, apart from this issue's spec file
       (its AC ticks) (mechanical — no red test; verified by
       `git diff --name-only origin/main...HEAD` listing only `CHANGELOG.md`, `README.md`,
       `CONTRIBUTING.md`, `guides/**/*.md` and `specs/issue-42-enriched-spec.md`)
-- [ ] AC-3: `guides/functions.md § Where Conditions` documents `:in` with both value forms and the `ArgumentError` sentence, and `§ List Functions` names membership (mechanical — no red test; verified by `grep -n ':in,\|unsupported where condition\|membership' guides/functions.md` returning 4 lines)
-- [ ] AC-4: no release is cut: `CHANGELOG.md` has no `## v0.1.11` heading and `## v0.1.10` is unchanged (mechanical — no red test; verified by `grep -c '^## v0.1.11' CHANGELOG.md` returning `0` and `git diff origin/main...HEAD -- CHANGELOG.md | grep -E '^-[^-]'` returning nothing)
+- [x] AC-3: `guides/functions.md § Where Conditions` documents `:in` with both value forms and the `ArgumentError` sentence, and `§ List Functions` names membership (mechanical — no red test; verified by `grep -n ':in,\|unsupported where condition\|membership' guides/functions.md` returning 4 lines)
+- [x] AC-4: no release is cut: `CHANGELOG.md` has no `## v0.1.11` heading and `## v0.1.10` is unchanged (mechanical — no red test; verified by `grep -c '^## v0.1.11' CHANGELOG.md` returning `0` and `git diff origin/main...HEAD -- CHANGELOG.md | grep -E '^-[^-]'` returning nothing)
 
 ##### Green checks
 1. `mix consistency` clean (code-issue); `mix test` — full suite green

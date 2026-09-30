@@ -312,7 +312,6 @@ where: {:price, :between, 100, 200}
 
 # Membership
 where: {:reference, :in, ["item_001", "item_045"]}
-where: {:reference, :in, "item_001,item_045"}   # comma-separated binary, split on ","
 
 # Dynamic queries
 where: dynamic([p], p.reference in ["item_001", "item_045", "item_063"])

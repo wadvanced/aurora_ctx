@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 ### Added
-- `:in` comparator for `:where` and `:or_where` conditions: `{field, :in, values}` takes a list of values, or a comma-separated binary split on `","`
+- `:in` comparator for `:where` and `:or_where` conditions: `{field, :in, values}` takes a list of values
 
 ### Changed
 - A `:where` or `:or_where` condition that matches no supported form raises `ArgumentError` naming the condition, instead of being silently ignored

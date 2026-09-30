@@ -49,8 +49,8 @@ defmodule Aurora.Ctx.MixProject do
       ## Dev dependencies
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
-      {:doctor, "~> 0.22", only: :dev, runtime: false},
-      {:ex_doc, "~> 0.38", only: :dev, runtime: false}
+      {:doctor, "~> 0.23", only: :dev, runtime: false},
+      {:ex_doc, "~> 0.40", only: :dev, runtime: false}
     ]
   end
 

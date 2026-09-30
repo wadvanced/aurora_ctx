@@ -4,13 +4,13 @@
 **Complexity:** normal
 
 ### Overview
-Adds the `:in` comparator to both `where` and `or_where` condition families of `Aurora.Ctx.QueryBuilder`, taking a list of values and a comma-separated binary. The two condition catch-alls raise `ArgumentError` naming the condition instead of dropping it. The issue ships as release 0.1.11: `DOC-1` carries the release CHANGELOG section and the install snippets, `COR-1` carries the Core layer change and the `mix.exs` version.
+Adds the `:in` comparator to both `where` and `or_where` condition families of `Aurora.Ctx.QueryBuilder`, taking a list of values and a comma-separated binary. The two condition catch-alls raise `ArgumentError` naming the condition instead of dropping it. `DOC-1` carries the `## [Unreleased]` CHANGELOG entries and the guide edits; `COR-1` carries the Core layer change.
 
 ### Section Map
 | ID | Type | Scope | Depends on | Branch | PR title |
 |---|---|---|---|---|---|
-| DOC-1 | Documentation | CHANGELOG.md § v0.1.11 · README.md § Installation · guides/functions.md § List Functions, § Where Conditions · guides/overview.md § Getting Started | none | federico/42-doc-1-in-comparator-release | docs: document the :in comparator and release 0.1.11 (#42 · DOC-1) |
-| COR-1 | Core | `:in` comparator in `where_condition/2` and `or_where_condition/2`; raising catch-alls; version 0.1.11 | DOC-1 | federico/42-cor-1-in-comparator | feat: support :in and raise on unsupported where conditions (#42 · COR-1) |
+| DOC-1 | Documentation | CHANGELOG.md § [Unreleased] · guides/functions.md § List Functions, § Where Conditions | none | federico/42-doc-1-in-comparator | docs: document the :in comparator and raising where conditions (#42 · DOC-1) |
+| COR-1 | Core | `:in` comparator in `where_condition/2` and `or_where_condition/2`; raising catch-alls | DOC-1 | federico/42-cor-1-in-comparator | feat: support :in and raise on unsupported where conditions (#42 · COR-1) |
 
 A section starts only when every dependency is **merged**. Independent
 sections may run in parallel. Status is derived from GitHub, never recorded
@@ -21,32 +21,22 @@ here.
 Depends on: none
 
 #### Documentation references
-- `CHANGELOG.md § [Unreleased]`, `§ v0.1.10` (the release-section style: `## v0.1.10` then `### Changed`, no Elixir / Ecto lines)
-- `README.md § Installation`
+- `CHANGELOG.md § [Unreleased]`
 - `guides/functions.md § List Functions`, `§ Query Options` › `§ Where Conditions`
-- `guides/overview.md § Getting Started`
 
 #### Implementation details
 
-Release decision (recorded): this issue releases 0.1.11. The CHANGELOG entries therefore go under a new `## v0.1.11` section, not under `## [Unreleased]`.
-
 ##### CHANGELOG.md
-1. § `## [Unreleased]` — keep the heading `## [Unreleased]`, followed by one blank line and no entries.
-2. Insert, between the blank line after `## [Unreleased]` and the line `## v0.1.10`, verbatim:
+1. § `## [Unreleased]` › `### Added` — insert verbatim, as the last entry of `### Added`; create `### Added` directly below `## [Unreleased]` and its blank line when absent:
    ```
-   ## v0.1.11
-   ### Added
    - `:in` comparator for `:where` and `:or_where` conditions: `{field, :in, values}` takes a list of values, or a comma-separated binary split on `","`
-
-   ### Changed
-   - A `:where` or `:or_where` condition that matches no supported form raises `ArgumentError` naming the condition, instead of being silently ignored
-
    ```
-3. Every entry present under `## [Unreleased]` on `origin/main` when this section is coded moves into `## v0.1.11`, under the subsection of the same name (`### Added`, `### Changed`, `### Fixed`, created in that order when absent), after the entries of step 2.
+2. § `## [Unreleased]` › `### Changed` — insert verbatim, as the last entry of `### Changed`; create `### Changed` after the `### Added` entries, with one blank line before it, when absent:
+   ```
+   - A `:where` or `:or_where` condition that matches no supported form raises `ArgumentError` naming the condition, instead of being silently ignored
+   ```
+3. One blank line separates the last `## [Unreleased]` entry from the line `## v0.1.10`.
 4. `## v0.1.10` and every older section stay byte-identical.
-
-##### README.md
-1. § Installation — in the `deps` code block, replace `{:aurora_ctx, "~> 0.1.10"}` with `{:aurora_ctx, "~> 0.1.11"}`.
 
 ##### guides/functions.md
 1. § List Functions — replace the line
@@ -69,19 +59,16 @@ Release decision (recorded): this issue releases 0.1.11. The CHANGELOG entries t
    `:or_where` accepts the same conditions as `:where`. A condition that matches none of the forms above raises `ArgumentError` (`unsupported where condition: ...`, `unsupported or_where condition: ...`) instead of being ignored.
    ```
 
-##### guides/overview.md
-1. § Getting Started — in the `deps` code block, replace `{:aurora_ctx, "~> 0.1.10"}` with `{:aurora_ctx, "~> 0.1.11"}`.
-
 ##### Acceptance criteria
-- [ ] AC-1: the CHANGELOG entries sit under `## v0.1.11`, directly below an empty `## [Unreleased]`, and carry no issue-link suffix (mechanical — no red test; verified by
-      `git diff origin/main...HEAD -- CHANGELOG.md | grep -E '^\+.*\[#[0-9]+\]'` returning nothing, and `grep -n -A2 '^## \[Unreleased\]' CHANGELOG.md` showing `## v0.1.11` two lines below)
+- [ ] AC-1: the CHANGELOG entry sits under `## [Unreleased]` and carries no
+      issue-link suffix (mechanical — no red test; verified by
+      `git diff origin/main...HEAD -- CHANGELOG.md | grep -E '^\+.*\[#[0-9]+\]'` returning nothing)
 - [ ] AC-2: no file outside the documentation set modified, apart from this issue's spec file
       (its AC ticks) (mechanical — no red test; verified by
       `git diff --name-only origin/main...HEAD` listing only `CHANGELOG.md`, `README.md`,
       `CONTRIBUTING.md`, `guides/**/*.md` and `specs/issue-42-enriched-spec.md`)
-- [ ] AC-3: `README.md § Installation` pins `~> 0.1.11` (mechanical — no red test; verified by `grep -c '"~> 0.1.11"' README.md` returning `1` and `grep -c '0.1.10' README.md` returning `0`)
-- [ ] AC-4: `guides/functions.md § Where Conditions` documents `:in` with both value forms and the `ArgumentError` sentence, and `§ List Functions` names membership (mechanical — no red test; verified by `grep -n ':in,\|unsupported where condition\|membership' guides/functions.md` returning 4 lines)
-- [ ] AC-5: `guides/overview.md § Getting Started` pins `~> 0.1.11` (mechanical — no red test; verified by `grep -c '"~> 0.1.11"' guides/overview.md` returning `1`)
+- [ ] AC-3: `guides/functions.md § Where Conditions` documents `:in` with both value forms and the `ArgumentError` sentence, and `§ List Functions` names membership (mechanical — no red test; verified by `grep -n ':in,\|unsupported where condition\|membership' guides/functions.md` returning 4 lines)
+- [ ] AC-4: no release is cut: `CHANGELOG.md` has no `## v0.1.11` heading and `## v0.1.10` is unchanged (mechanical — no red test; verified by `grep -c '^## v0.1.11' CHANGELOG.md` returning `0` and `git diff origin/main...HEAD -- CHANGELOG.md | grep -E '^-[^-]'` returning nothing)
 
 ##### Green checks
 1. `mix consistency` clean (code-issue); `mix test` — full suite green
@@ -104,8 +91,7 @@ Depends on: DOC-1
 - [ ] AC-5: When `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :unknown, "item_001"}`, then it raises `ArgumentError` with the message `unsupported where condition: {:reference, :unknown, "item_001"}`
 - [ ] AC-6: When `Aurora.Ctx.Core.list/3` is called with `or_where: {:reference, :unknown, "item_001"}`, then it raises `ArgumentError` with the message `unsupported or_where condition: {:reference, :unknown, "item_001"}`
 - [ ] AC-7: When `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :in, 5}` (neither list nor binary), then it raises `ArgumentError` with the message `unsupported where condition: {:reference, :in, 5}`; the same value under `or_where:` raises with `unsupported or_where condition: {:reference, :in, 5}`
-- [ ] AC-8: `mix.exs` declares `@version "0.1.11"` (mechanical — no red test; verified by `grep -n '@version "0.1.11"' mix.exs` returning 1 line)
-- [ ] AC-9: the `Aurora.Ctx.QueryBuilder` `@moduledoc` and the `options/2` `@doc` list `:in` and the `ArgumentError` raise (mechanical — no red test; verified by `grep -n '`:in`\|ArgumentError' lib/aurora/ctx/query_builder.ex` listing the four doc lines of Core changes 7–8 and the two raising catch-alls, and `mix doctor` passing)
+- [ ] AC-8: the `Aurora.Ctx.QueryBuilder` `@moduledoc` and the `options/2` `@doc` list `:in` and the `ArgumentError` raise (mechanical — no red test; verified by `grep -n '`:in`\|ArgumentError' lib/aurora/ctx/query_builder.ex` listing the four doc lines of Core changes 7–8 and the two raising catch-alls, and `mix doctor` passing)
 
 ##### Test ports
 - `Aurora.Ctx.Core.list/3` · in: `(Aurora.Ctx.Repo, Aurora.Ctx.Test.Support.Inventory.Product, keyword())` with `:where` / `:or_where` · out: `[Product.t()]`, raises `ArgumentError` on an unsupported condition · existing (`lib/aurora/ctx/core.ex`, `list/3`, which pipes through `QueryBuilder.options/2`)
@@ -183,8 +169,7 @@ All rows: `add to test/cases/core_test.exs`, as new `test` blocks placed directl
    `ArgumentError` - A `:where` / `:or_where` condition matches none of the supported forms
 
    ```
-9. `mix.exs` — replace `@version "0.1.10"` with `@version "0.1.11"`.
-10. Fixtures: none. `test/support/helper.ex` `create_sample_products/1` already yields references `item_001` … `item_100` for 100 products.
+9. Fixtures: none. `test/support/helper.ex` `create_sample_products/1` already yields references `item_001` … `item_100` for 100 products.
 
 ##### Green tests
 1. The red tests above pass, unmodified (code-issue runs these, targeted)
@@ -200,5 +185,5 @@ All rows: `add to test/cases/core_test.exs`, as new `test` blocks placed directl
 - The `option/2` catch-all (an unknown query option key) keeps ignoring its input.
 - `or_where_condition/2` applying a `%Ecto.Query.DynamicExpr{}` with `where:` instead of `or_where:`: unchanged by this issue.
 - Tests through generated functions (`list_products/1` and siblings): they delegate to `Aurora.Ctx.Core.list/3`, which `COR-1` tests directly.
-- Publishing the 0.1.11 package to Hex and tagging `v0.1.11`.
+- Cutting a release: the `mix.exs` `@version` bump, a `## v0.1.11` CHANGELOG section, the `~> 0.1.10` install pins in `README.md § Installation` and `guides/overview.md § Getting Started`, the Hex publish and the `v0.1.11` tag.
 <!-- enriched-spec:end -->

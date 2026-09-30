@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - A `:where` or `:or_where` condition that matches no supported form raises `ArgumentError` naming the condition, instead of being silently ignored
+- `credo` upgraded from 1.7.15 to 1.7.19
+- `dialyxir` upgraded from 1.4.7 to 1.4.8
+- `doctor` upgraded from 0.22.0 to 0.23.0
+- `ecto_sql` upgraded from 3.13.4 to 3.14.0
+- `ex_doc` upgraded from 0.39.3 to 0.40.4
+- `postgrex` upgraded from 0.21.1 to 0.22.4
 
 ## v0.1.10
 ### Changed

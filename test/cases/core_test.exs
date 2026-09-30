@@ -166,6 +166,71 @@ defmodule Aurora.Ctx.Test.Cases.CoreTest do
     )
   end
 
+  test "Test list filter - where :in with a list" do
+    delete_all_products()
+    create_sample_products(100)
+
+    assert Repo
+           |> Core.list(Product,
+             where: {:reference, :in, ["item_001", "item_045", "item_063"]},
+             order_by: :reference
+           )
+           |> Enum.map(& &1.reference) == ["item_001", "item_045", "item_063"]
+  end
+
+  test "Test list filter - :in with a binary value raises" do
+    assert_raise ArgumentError,
+                 ~s(unsupported where condition: {:reference, :in, "item_001,item_045"}),
+                 fn -> Core.list(Repo, Product, where: {:reference, :in, "item_001,item_045"}) end
+
+    assert_raise ArgumentError,
+                 ~s(unsupported or_where condition: {:reference, :in, "item_001,item_045"}),
+                 fn ->
+                   Core.list(Repo, Product, or_where: {:reference, :in, "item_001,item_045"})
+                 end
+  end
+
+  test "Test list filter - or_where :in with a list" do
+    delete_all_products()
+    create_sample_products(100)
+
+    assert Repo
+           |> Core.list(Product,
+             where: {:reference, :eq, "item_090"},
+             or_where: {:reference, :in, ["item_001", "item_045"]}
+           )
+           |> Enum.count() == 3
+  end
+
+  test "Test list filter - where :in with an empty list returns no records" do
+    delete_all_products()
+    create_sample_products(100)
+
+    assert Core.list(Repo, Product, where: {:reference, :in, []}) == []
+  end
+
+  test "Test list filter - unsupported where condition raises" do
+    assert_raise ArgumentError,
+                 ~s(unsupported where condition: {:reference, :unknown, "item_001"}),
+                 fn -> Core.list(Repo, Product, where: {:reference, :unknown, "item_001"}) end
+  end
+
+  test "Test list filter - unsupported or_where condition raises" do
+    assert_raise ArgumentError,
+                 ~s(unsupported or_where condition: {:reference, :unknown, "item_001"}),
+                 fn -> Core.list(Repo, Product, or_where: {:reference, :unknown, "item_001"}) end
+  end
+
+  test "Test list filter - :in with an integer value raises" do
+    assert_raise ArgumentError, "unsupported where condition: {:reference, :in, 5}", fn ->
+      Core.list(Repo, Product, where: {:reference, :in, 5})
+    end
+
+    assert_raise ArgumentError, "unsupported or_where condition: {:reference, :in, 5}", fn ->
+      Core.list(Repo, Product, or_where: {:reference, :in, 5})
+    end
+  end
+
   test "Test list bare pagination" do
     delete_all_products()
     create_sample_products(100)

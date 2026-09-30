@@ -17,7 +17,10 @@ defmodule Aurora.Ctx.QueryBuilder do
   - Comparisons: `:gt`, `:ge`, `:lt`, `:le`, `:eq`
   - Pattern matching: `:like`, `:ilike`
   - Range queries: `:between`
+  - Membership: `:in`, with a list of values
   - Dynamic expressions for complex logic
+
+  A `:where` / `:or_where` condition that matches none of these forms raises `ArgumentError`.
 
   ## Examples
 
@@ -86,6 +89,8 @@ defmodule Aurora.Ctx.QueryBuilder do
       - `:ilike` - Case-insensitive pattern matching
     - Range operator:
       - `:between` - Value should be within a start/end range
+    - Membership operator:
+      - `:in` - Field value is one of a list of values
     - Dynamic queries:
       - `dynamic(bindings, query_expression)` - Can be used to build complex queries
 
@@ -115,6 +120,10 @@ defmodule Aurora.Ctx.QueryBuilder do
   ## Returns
 
   `Ecto.Query.t()` | `nil` - Modified query or nil if input was nil
+
+  ## Raises
+
+  `ArgumentError` - A `:where` / `:or_where` condition matches none of the supported forms
 
   """
   @spec options(Ecto.Query.t() | nil, keyword()) :: Ecto.Query.t() | nil
@@ -224,11 +233,15 @@ defmodule Aurora.Ctx.QueryBuilder do
   defp where_condition({field, :ilike, value}, query),
     do: from(q in query, where: q |> field(^field) |> ilike(^value))
 
+  defp where_condition({field, :in, values}, query) when is_list(values),
+    do: from(q in query, where: field(q, ^field) in ^values)
+
   defp where_condition({field, :between, start_value, end_value}, query),
     do:
       from(q in query, where: field(q, ^field) >= ^start_value and field(q, ^field) <= ^end_value)
 
-  defp where_condition(_where_condition, query), do: query
+  defp where_condition(condition, _query),
+    do: raise(ArgumentError, "unsupported where condition: #{inspect(condition)}")
 
   # Applies an OR WHERE condition to the query based on the condition type
   @spec or_where_condition(tuple() | Ecto.Query.dynamic_expr(), Ecto.Query.t()) :: Ecto.Query.t()
@@ -261,11 +274,15 @@ defmodule Aurora.Ctx.QueryBuilder do
   defp or_where_condition({field, :ilike, value}, query),
     do: from(q in query, or_where: q |> field(^field) |> ilike(^value))
 
+  defp or_where_condition({field, :in, values}, query) when is_list(values),
+    do: from(q in query, or_where: field(q, ^field) in ^values)
+
   defp or_where_condition({field, :between, start_value, end_value}, query),
     do:
       from(q in query,
         or_where: field(q, ^field) >= ^start_value and field(q, ^field) <= ^end_value
       )
 
-  defp or_where_condition(_or_where_condition, query), do: query
+  defp or_where_condition(condition, _query),
+    do: raise(ArgumentError, "unsupported or_where condition: #{inspect(condition)}")
 end

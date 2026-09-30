@@ -83,14 +83,14 @@ Depends on: DOC-1
 
 #### Implementation details
 ##### Acceptance criteria
-- [ ] AC-1: Given 100 sample products, when `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :in, ["item_001", "item_045", "item_063"]}`, then it returns exactly those 3 products
-- [ ] AC-2: When `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :in, "item_001,item_045"}` (a binary), then it raises `ArgumentError` with the message `unsupported where condition: {:reference, :in, "item_001,item_045"}`; the same value under `or_where:` raises with `unsupported or_where condition: {:reference, :in, "item_001,item_045"}`
-- [ ] AC-3: Given 100 sample products, when `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :eq, "item_090"}` and `or_where: {:reference, :in, ["item_001", "item_045"]}`, then it returns 3 products
-- [ ] AC-4: Given 100 sample products, when `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :in, []}`, then it returns `[]`
-- [ ] AC-5: When `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :unknown, "item_001"}`, then it raises `ArgumentError` with the message `unsupported where condition: {:reference, :unknown, "item_001"}`
-- [ ] AC-6: When `Aurora.Ctx.Core.list/3` is called with `or_where: {:reference, :unknown, "item_001"}`, then it raises `ArgumentError` with the message `unsupported or_where condition: {:reference, :unknown, "item_001"}`
-- [ ] AC-7: When `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :in, 5}` (an integer, not a list), then it raises `ArgumentError` with the message `unsupported where condition: {:reference, :in, 5}`; the same value under `or_where:` raises with `unsupported or_where condition: {:reference, :in, 5}`
-- [ ] AC-8: the `Aurora.Ctx.QueryBuilder` `@moduledoc` and the `options/2` `@doc` list `:in` and the `ArgumentError` raise (mechanical — no red test; verified by `grep -n '`:in`\|ArgumentError' lib/aurora/ctx/query_builder.ex` listing the four doc lines of Core changes 7–8 and the two raising catch-alls, and `mix doctor` passing)
+- [x] AC-1: Given 100 sample products, when `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :in, ["item_001", "item_045", "item_063"]}`, then it returns exactly those 3 products
+- [x] AC-2: When `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :in, "item_001,item_045"}` (a binary), then it raises `ArgumentError` with the message `unsupported where condition: {:reference, :in, "item_001,item_045"}`; the same value under `or_where:` raises with `unsupported or_where condition: {:reference, :in, "item_001,item_045"}`
+- [x] AC-3: Given 100 sample products, when `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :eq, "item_090"}` and `or_where: {:reference, :in, ["item_001", "item_045"]}`, then it returns 3 products
+- [x] AC-4: Given 100 sample products, when `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :in, []}`, then it returns `[]`
+- [x] AC-5: When `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :unknown, "item_001"}`, then it raises `ArgumentError` with the message `unsupported where condition: {:reference, :unknown, "item_001"}`
+- [x] AC-6: When `Aurora.Ctx.Core.list/3` is called with `or_where: {:reference, :unknown, "item_001"}`, then it raises `ArgumentError` with the message `unsupported or_where condition: {:reference, :unknown, "item_001"}`
+- [x] AC-7: When `Aurora.Ctx.Core.list/3` is called with `where: {:reference, :in, 5}` (an integer, not a list), then it raises `ArgumentError` with the message `unsupported where condition: {:reference, :in, 5}`; the same value under `or_where:` raises with `unsupported or_where condition: {:reference, :in, 5}`
+- [x] AC-8: the `Aurora.Ctx.QueryBuilder` `@moduledoc` and the `options/2` `@doc` list `:in` and the `ArgumentError` raise (mechanical — no red test; verified by `grep -n '`:in`\|ArgumentError' lib/aurora/ctx/query_builder.ex` listing the four doc lines of Core changes 7–8 and the two raising catch-alls, and `mix doctor` passing)
 
 ##### Test ports
 - `Aurora.Ctx.Core.list/3` · in: `(Aurora.Ctx.Repo, Aurora.Ctx.Test.Support.Inventory.Product, keyword())` with `:where` / `:or_where` · out: `[Product.t()]`, raises `ArgumentError` on an unsupported condition · existing (`lib/aurora/ctx/core.ex`, `list/3`, which pipes through `QueryBuilder.options/2`)

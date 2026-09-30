@@ -121,6 +121,11 @@ products = Inventory.list_products(
   where: {:price, :between, Decimal.new("10.00"), Decimal.new("50.00")}
 )
 
+# Membership
+products = Inventory.list_products(
+  where: {:status, :in, ["active", "pending_review"]}
+)
+
 # Dynamic queries
 products = Inventory.list_products(where: dynamic([p], p.price >= 10 and p.price <= 50))
 
@@ -129,6 +134,9 @@ products = Inventory.list_products(
   where: [status: "active"],
   or_where: [status: "pending_review"]
 )
+
+# A condition in no supported form raises ArgumentError instead of being ignored
+Inventory.list_products(where: [{:price, :unknown, 100}])
 ```
 
 ### Sorting

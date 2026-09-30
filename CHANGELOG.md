@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+## v0.1.11
+- Uses Elixir v1.17+
+- Compatible with Ecto 3.12+
+
 ### Added
 - `:in` comparator for `:where` and `:or_where` conditions: `{field, :in, values}` takes a list of values
 - AI agent guidance for contributors: `AGENTS.md`, `CLAUDE.md` and an issue-to-PR pipeline of skills, agents and scripts under `.claude/`

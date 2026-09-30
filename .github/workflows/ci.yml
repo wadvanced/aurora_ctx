@@ -10,12 +10,14 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   build:
 
     name: Build and test
     runs-on: ubuntu-latest
+    if: ${{ !github.event.pull_request.draft }}
 
     strategy:
       matrix: 
@@ -39,7 +41,29 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    # A pull request made only of documentation, images and specs still reports
+    # this job (the required check) but skips every step below. Keep the
+    # exemption list in sync with .claude/scripts/gate.sh.
+    - name: Detect non-doc changes
+      id: changes
+      uses: dorny/paths-filter@v4
+      with:
+        predicate-quantifier: 'every'
+        filters: |
+          code:
+            - '**'
+            - '!**/*.md'
+            - '!LICENSE'
+            - '!**/*.png'
+            - '!**/*.jpg'
+            - '!**/*.jpeg'
+            - '!**/*.gif'
+            - '!**/*.svg'
+            - '!specs/**'
+
     - name: Set up Elixir
+      if: steps.changes.outputs.code == 'true'
       id: setup-beam
       uses: erlef/setup-beam@e6d7c94229049569db56a7ad5a540c051a010af9 # v1.20.4
       with:
@@ -47,6 +71,7 @@ jobs:
         otp-version: ${{ matrix.otp }}     # [Required] Define the Erlang/OTP version
 
     - name: Restore dependencies cache
+      if: steps.changes.outputs.code == 'true'
       id: cache-deps
       uses: actions/cache@v3
       with:
@@ -56,17 +81,20 @@ jobs:
         key: ${{ runner.os }}-mix-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles('**/mix.lock') }}
         restore-keys: ${{ runner.os }}-mix-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles('**/mix.lock') }}
 
-    - if: ${{steps.cache-deps.outputs.cache-hit != 'true' }}
+    - if: ${{ steps.changes.outputs.code == 'true' && steps.cache-deps.outputs.cache-hit != 'true' }}
       name: Install dependencies
       run: |
         mix deps.get
         mix deps.compile
 
     - name: Compile app
+      if: steps.changes.outputs.code == 'true'
       run: mix compile --force
 
     - name: Check consistency
+      if: steps.changes.outputs.code == 'true'
       run: mix consistency
 
     - name: Run tests
+      if: steps.changes.outputs.code == 'true'
       run: mix test
